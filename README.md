@@ -8,8 +8,12 @@ Features from book:
 
 Added features:
 - Modular codebase
-- Modulus operator (%)
-- Double-precision floating-point numbers
-- Automatic type coercion between integers and floating-point numbers
-- Generic "number" type
+- Modulus operator (%) for both integers and floating-point
 - Textual operator aliases (add, subtract, multiply, divide, modulo)
+- Double-precision floating-point numbers
+- Generic "number" type
+- Automatic type coercion between integers and floating-point numbers
+
+Problems that prevent this from being practical:
+- No Unicode support
+- S-expressions are variable arrays instead of linked-lists/cons cells

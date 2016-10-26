@@ -2,151 +2,151 @@
 #include <stdio.h>
 #include <math.h>
 
+#include "parser.h"
 #include "eval.h"
+#include "errors.h"
 
-ResultValue eval(mpc_ast_t* t) {
-  if (strstr(t->tag, "integer")) {
-    errno = 0;
-    long x = strtol(t->contents, NULL, 10);
-    return errno != ERANGE
-      ? new__IntegerResultValue(x)
-      : new__ErrorResultValue(ERROR_NUMBER_TOO_LARGE);
+ResultValue* ResultValue__eval_s_expression(ResultValue* v) {
+  for (int i = 0; i < v->count; i++)
+    v->cell[i] = ResultValue__eval(v->cell[i]);
+
+  for (int i = 0; i < v->count; i++)
+    if (v->cell[i]->type == RESULT_VALUE_ERROR)
+      return ResultValue__take(v, i);
+
+  if (v->count == 0) return v;
+  if (v->count == 1) return ResultValue__take(v, 0);
+
+  ResultValue* f = ResultValue__pop(v, 0);
+  if (f->type != RESULT_VALUE_SYMBOL) {
+    ResultValue__free(f);
+    ResultValue__free(v);
+    return new__ErrorResultValue("S-Expression does not begin with a symbol.");
   }
 
-  if (strstr(t->tag, "decimal")) {
-    errno = 0;
-    // TODO: handle other parse errors which would be returned via pointer
-    // passed-in as the second argument instead of NULL (see: man strtod)
-    double x = strtod(t->contents, NULL);
-    return errno != ERANGE
-      ? new__DecimalResultValue(x)
-      : new__ErrorResultValue(ERROR_NUMBER_TOO_LARGE);
-  }
+  ResultValue* result = builtin_op(v, f->symbol);
+  ResultValue__free(f);
+  return result;
+}
 
-  char* op = t->children[1]->contents;
-  ResultValue x = eval(t->children[2]);
+ResultValue* ResultValue__eval(ResultValue* v) {
+  if (v->type == RESULT_VALUE_S_EXPRESSION)
+    return ResultValue__eval_s_expression(v);
+  else
+    return v;
+}
 
-  int i = 3;
-  while (strstr(t->children[i]->tag, "expression")) {
-    x = eval_op(x, op, eval(t->children[i]));
-    i++;
-  }
-
+ResultValue* ResultValue__pop(ResultValue* v, int i) {
+  ResultValue* x = v->cell[i];
+  memmove(&v->cell[i], &v->cell[i+1], sizeof(ResultValue*) * (v->count-i-1));
+  v->count--;
+  v->cell = realloc(v->cell, sizeof(ResultValue*) * v->count);
   return x;
 }
 
-ResultValue eval_op(ResultValue x, char* op, ResultValue y) {
-  if (x.type == RESULT_VALUE_ERROR) { return x; }
-  if (y.type == RESULT_VALUE_ERROR) { return y; }
-
-  int type = RESULT_VALUE_INTEGER;
-  if (x.type == RESULT_VALUE_DECIMAL || y.type == RESULT_VALUE_DECIMAL) {
-    type = RESULT_VALUE_DECIMAL;
-  }
-
-  if (strcmp(op, "+") == 0 || strcmp(op, "add") == 0) {
-    return eval_op_add(type, x, y);
-  }
-  if (strcmp(op, "-") == 0 || strcmp(op, "subtract") == 0) {
-    return eval_op_subtract(type, x, y);
-  }
-  if (strcmp(op, "*") == 0 || strcmp(op, "multiply") == 0) {
-    return eval_op_multiply(type, x, y);
-  }
-  if (strcmp(op, "/") == 0 || strcmp(op, "divide") == 0) {
-    return eval_op_divide(type, x, y);
-  }
-  if (strcmp(op, "%") == 0 || strcmp(op, "modulo") == 0) {
-    return eval_op_modulo(type, x, y);
-  }
-
-  return new__ErrorResultValue(ERROR_UNKNOWN_OPERATOR);
+ResultValue* ResultValue__take(ResultValue* v, int i) {
+  ResultValue* x = ResultValue__pop(v, i);
+  ResultValue__free(v);
+  return x;
 }
 
-ResultValue eval_op_add(int type, ResultValue x, ResultValue y) {
-  switch (type) {
-    case RESULT_VALUE_DECIMAL:
-      return new__DecimalResultValue(
-        ResultValue__to_double(x) + ResultValue__to_double(y)
-      );
+void NumberResultValue__negate_mutate(ResultValue* v) {
+  switch (v->type) {
     case RESULT_VALUE_INTEGER:
-      return new__IntegerResultValue(
-        ResultValue__to_long(x) + ResultValue__to_long(y)
-      );
-    default:
-      return new__ErrorResultValue(ERROR_UNKNOWN_RESULT_TYPE);
-  }
-}
-
-ResultValue eval_op_subtract(int type, ResultValue x, ResultValue y) {
-  switch (type) {
+      v->integer = -v->integer;
+      return;
     case RESULT_VALUE_DECIMAL:
-      return new__DecimalResultValue(
-        ResultValue__to_double(x) - ResultValue__to_double(y)
-      );
-    case RESULT_VALUE_INTEGER:
-      return new__IntegerResultValue(
-        ResultValue__to_long(x) - ResultValue__to_long(y)
-      );
-    default:
-      return new__ErrorResultValue(ERROR_UNKNOWN_RESULT_TYPE);
+      v->decimal = -v->decimal;
+      return;
   }
 }
 
-ResultValue eval_op_multiply(int type, ResultValue x, ResultValue y) {
-  switch (type) {
+void NumberResultValue__add_mutate(ResultValue* v, ResultValue* x) {
+  switch (v->type) {
+    case RESULT_VALUE_INTEGER:
+      v->integer += x->integer;
+      return;
     case RESULT_VALUE_DECIMAL:
-      return new__DecimalResultValue(
-        ResultValue__to_double(x) * ResultValue__to_double(y)
-      );
-    case RESULT_VALUE_INTEGER:
-      return new__IntegerResultValue(
-        ResultValue__to_long(x) * ResultValue__to_long(y)
-      );
-    default:
-      return new__ErrorResultValue(ERROR_UNKNOWN_RESULT_TYPE);
+      v->decimal += x->decimal;
+      return;
   }
 }
 
-ResultValue eval_op_divide(int type, ResultValue xval, ResultValue yval) {
-  double dx, dy;
-  long lx, ly;
-  switch (type) {
+void NumberResultValue__subtract_mutate(ResultValue* v, ResultValue* x) {
+  switch (v->type) {
+    case RESULT_VALUE_INTEGER:
+      v->integer -= x->integer;
+      return;
     case RESULT_VALUE_DECIMAL:
-      dx = ResultValue__to_double(xval);
-      dy = ResultValue__to_double(yval);
-      return dy == 0.0
-        ? new__ErrorResultValue(ERROR_DIVIDE_BY_ZERO)
-        : new__DecimalResultValue(dx / dy);
-    case RESULT_VALUE_INTEGER:
-      lx = ResultValue__to_long(xval);
-      ly = ResultValue__to_long(yval);
-      return ly == 0
-        ? new__ErrorResultValue(ERROR_DIVIDE_BY_ZERO)
-        : new__IntegerResultValue(lx / ly);
-    default:
-      return new__ErrorResultValue(ERROR_UNKNOWN_RESULT_TYPE);
+      v->decimal -= x->decimal;
+      return;
   }
 }
 
-ResultValue eval_op_modulo(int type, ResultValue xval, ResultValue yval) {
-  double dx, dy;
-  long lx, ly;
-  switch (type) {
+void NumberResultValue__multiply_mutate(ResultValue* v, ResultValue* x) {
+  switch (v->type) {
+    case RESULT_VALUE_INTEGER:
+      v->integer *= x->integer;
+      return;
     case RESULT_VALUE_DECIMAL:
-      dx = ResultValue__to_double(xval);
-      dy = ResultValue__to_double(yval);
-      return dy == 0.0
-        ? new__ErrorResultValue(ERROR_DIVIDE_BY_ZERO)
-        : new__DecimalResultValue(fmod(dx, dy));
-    case RESULT_VALUE_INTEGER:
-      lx = ResultValue__to_long(xval);
-      ly = ResultValue__to_long(yval);
-      return ly == 0
-        ? new__ErrorResultValue(ERROR_DIVIDE_BY_ZERO)
-        : new__IntegerResultValue(lx % ly);
-    default:
-      return new__ErrorResultValue(ERROR_UNKNOWN_RESULT_TYPE);
+      v->decimal *= x->decimal;
+      return;
   }
 }
 
+void NumberResultValue__divide_mutate(ResultValue* v, ResultValue* x) {
+  switch (v->type) {
+    case RESULT_VALUE_INTEGER:
+      v->integer /= x->integer;
+      return;
+    case RESULT_VALUE_DECIMAL:
+      v->decimal /= x->decimal;
+      return;
+  }
+}
+
+ResultValue* builtin_op(ResultValue* a, char* op) {
+  for (int i = 0; i < a->count; i++) {
+    if (a->cell[i]->type != RESULT_VALUE_INTEGER &&
+        a->cell[i]->type != RESULT_VALUE_DECIMAL) {
+      ResultValue__free(a);
+      return new__ErrorResultValue("Cannot operate on non-number.");
+    }
+  }
+
+  ResultValue* x = ResultValue__pop(a, 0);
+
+  if ((strcmp(op, "-") || strcmp(op, "subtract")) && a->count == 0) {
+    NumberResultValue__negate_mutate(x);
+  }
+
+  while (a->count > 0) {
+    ResultValue* y = ResultValue__pop(a, 0);
+    if (strcmp(op, "+") == 0 || strcmp(op, "add") == 0)
+      NumberResultValue__add_mutate(x, y);
+    if (strcmp(op, "-") == 0 || strcmp(op, "subtract") == 0)
+      NumberResultValue__subtract_mutate(x, y);
+    if (strcmp(op, "*") == 0 || strcmp(op, "multiply") == 0)
+      NumberResultValue__multiply_mutate(x, y);
+    if (strcmp(op, "/") == 0 || strcmp(op, "divide") == 0) {
+      if (y->type == RESULT_VALUE_INTEGER && y->integer == 0) {
+        ResultValue__free(x);
+        ResultValue__free(y);
+        x = new__ErrorResultValue("Cannot divide by zero.");
+        break;
+      } else if (y->type == RESULT_VALUE_DECIMAL && y->decimal == 0.0) {
+        ResultValue__free(x);
+        ResultValue__free(y);
+        x = new__ErrorResultValue("Cannot divide by zero.");
+        break;
+      } else {
+        NumberResultValue__divide_mutate(x, y);
+      }
+    }
+
+    ResultValue__free(y);
+  }
+
+  ResultValue__free(a);
+  return x;
+}
