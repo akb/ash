@@ -158,8 +158,7 @@ Node* builtin_op(Node* a, char* op) {
 }
 
 Node* builtin_head(Node* a) {
-  ASSERT_NODE(a, a->count == 1,
-    "Function \"head\" only accepts one argument");
+  ASSERT_NODE_LENGTH(a, 1, "Function \"head\" only accepts one argument");
   ASSERT_NODE(a, a->cell[0]->type == NODE_Q_EXPRESSION,
     "Function \"head\" only operates on Q-expressions");
   ASSERT_NODE(a, a->cell[0]->count != 0,
@@ -172,8 +171,7 @@ Node* builtin_head(Node* a) {
 }
 
 Node* builtin_tail(Node* a) {
-  ASSERT_NODE(a, a->count == 1,
-    "Function \"tail\" only accepts one argument");
+  ASSERT_NODE_LENGTH(a, 1, "Function \"tail\" only accepts one argument");
   ASSERT_NODE(a, a->cell[0]->type == NODE_Q_EXPRESSION,
     "Function \"tail\" only operates on Q-expressions");
   ASSERT_NODE(a, a->cell[0]->count != 0,
@@ -190,8 +188,7 @@ Node* builtin_list(Node* a) {
 }
 
 Node* builtin_evaluate(Node* a) {
-  ASSERT_NODE(a, a->count == 1,
-    "Function \"evaluate\" only accepts one argument");
+  ASSERT_NODE_LENGTH(a, 1, "Function \"evaluate\" only accepts one argument");
   ASSERT_NODE(a, a->cell[0]->type == NODE_Q_EXPRESSION,
     "Function \"evaluate\" only operates on Q-expressions");
 
@@ -214,8 +211,7 @@ Node* builtin_join(Node* a) {
 }
 
 Node* builtin_construct(Node* a) {
-  ASSERT_NODE(a, a->count == 2,
-    "Function \"construct\" requires two arguments");
+  ASSERT_NODE_LENGTH(a, 2, "Function \"construct\" requires two arguments");
   ASSERT_NODE(a, a->cell[1]->type == NODE_Q_EXPRESSION,
     "Function \"construct\" requires a Q-expression as its second argument");
 
@@ -228,6 +224,17 @@ Node* builtin_construct(Node* a) {
   return x;
 }
 
+Node* builtin_length(Node* a) {
+  printf("a->count %d\n", a->count);
+  ASSERT_NODE_LENGTH(a, 1, "Function \"length\" requires a single argument");
+  ASSERT_NODE(a, a->cell[0]->type == NODE_Q_EXPRESSION,
+    "Function \"length\" requires a Q-expression as its only argument");
+
+  long count = a->cell[0]->count;
+  Node__free(a);
+  return new__IntegerNode(count);
+}
+
 Node* builtin(Node* a, char* symbol) {
   if (strcmp("list", symbol) == 0) return builtin_list(a);
   if (strcmp("head", symbol) == 0) return builtin_head(a);
@@ -235,6 +242,7 @@ Node* builtin(Node* a, char* symbol) {
   if (strcmp("join", symbol) == 0) return builtin_join(a);
   if (strcmp("evaluate", symbol) == 0) return builtin_evaluate(a);
   if (strcmp("construct", symbol) == 0) return builtin_construct(a);
+  if (strcmp("length", symbol) == 0) return builtin_length(a);
   if (strstr("+-/*%", symbol)) return builtin_op(a, symbol);
   if (strcmp("add", symbol)      == 0 ||
       strcmp("subtract", symbol) == 0 ||

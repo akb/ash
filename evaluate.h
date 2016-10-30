@@ -7,6 +7,12 @@
     return new__ErrorNode(ERR); \
   }
 
+#define ASSERT_NODE_LENGTH(ARGS, COUNT, ERR) \
+  if (ARGS->count != COUNT) { \
+    Node__free(ARGS); \
+    return new__ErrorNode(ERR); \
+  }
+
 Node* Node__evaluate(Node*);
 Node* Node__evaluate_s_expression(Node*);
 Node* Node__pop(Node*, int);

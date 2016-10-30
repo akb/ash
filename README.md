@@ -5,6 +5,9 @@ Ash is a toy language made for the book "Build your own LISP" by Daniel Holden.
 Features from book:
 - REPL
 - Basic math operators (+, -, *, /)
+- S-Expressions
+- Q-Expressions
+- Builtin functions for Q-Expressions (list, head, tail, join, evaluate)
 
 Added features:
 - Modular codebase
@@ -13,6 +16,8 @@ Added features:
 - Double-precision floating-point numbers
 - Generic "number" type
 - Automatic type coercion between integers and floating-point numbers
+- "construct" (cons) builtin
+- "length" (len) builtin
 
 Problems that prevent this from being practical:
 - No Unicode support
