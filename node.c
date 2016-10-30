@@ -4,7 +4,7 @@
 #include <limits.h>
 #include <string.h>
 
-#include "result.h"
+#include "node.h"
 
 /**
  * dtol

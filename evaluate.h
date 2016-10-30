@@ -1,4 +1,4 @@
-#include "result.h"
+#include "node.h"
 #include "mpc.h"
 
 #define ASSERT_NODE(ARGS, COND, ERR) \
@@ -7,8 +7,8 @@
     return new__ErrorNode(ERR); \
   }
 
-Node* Node__eval(Node*);
-Node* Node__eval_s_expression(Node*);
+Node* Node__evaluate(Node*);
+Node* Node__evaluate_s_expression(Node*);
 Node* Node__pop(Node*, int);
 Node* Node__take(Node*, int);
 void NumberNode__negate_mutate(Node*);

@@ -1,7 +1,7 @@
 #ifndef ASH_PARSER_DEFINED
 #define ASH_PARSER_DEFINED
 #include "mpc.h"
-#include "result.h"
+#include "node.h"
 
 #define PARSER_TAG_ROOT         ">"
 #define PARSER_TAG_DECIMAL      "decimal"

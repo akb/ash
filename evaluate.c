@@ -3,12 +3,12 @@
 #include <math.h>
 
 #include "parser.h"
-#include "eval.h"
+#include "evaluate.h"
 #include "errors.h"
 
-Node* Node__eval_s_expression(Node* v) {
+Node* Node__evaluate_s_expression(Node* v) {
   for (int i = 0; i < v->count; i++)
-    v->cell[i] = Node__eval(v->cell[i]);
+    v->cell[i] = Node__evaluate(v->cell[i]);
 
   for (int i = 0; i < v->count; i++)
     if (v->cell[i]->type == NODE_ERROR)
@@ -29,9 +29,9 @@ Node* Node__eval_s_expression(Node* v) {
   return result;
 }
 
-Node* Node__eval(Node* v) {
+Node* Node__evaluate(Node* v) {
   if (v->type == NODE_S_EXPRESSION)
-    return Node__eval_s_expression(v);
+    return Node__evaluate_s_expression(v);
   else
     return v;
 }
@@ -189,15 +189,15 @@ Node* builtin_list(Node* a) {
   return a;
 }
 
-Node* builtin_eval(Node* a) {
+Node* builtin_evaluate(Node* a) {
   ASSERT_NODE(a, a->count == 1,
-    "Function \"eval\" only accepts one argument");
+    "Function \"evaluate\" only accepts one argument");
   ASSERT_NODE(a, a->cell[0]->type == NODE_Q_EXPRESSION,
-    "Function \"eval\" only operates on Q-expressions");
+    "Function \"evaluate\" only operates on Q-expressions");
 
   Node* x = Node__take(a, 0);
   x->type = NODE_S_EXPRESSION;
-  return Node__eval(x);
+  return Node__evaluate(x);
 }
 
 Node* builtin_join(Node* a) {
@@ -213,12 +213,28 @@ Node* builtin_join(Node* a) {
   return x;
 }
 
+Node* builtin_construct(Node* a) {
+  ASSERT_NODE(a, a->count == 2,
+    "Function \"construct\" requires two arguments");
+  ASSERT_NODE(a, a->cell[1]->type == NODE_Q_EXPRESSION,
+    "Function \"construct\" requires a Q-expression as its second argument");
+
+  Node* head = Node__pop(a, 0);
+  Node* tail = Node__pop(a, 0);
+  Node__free(a);
+  Node* x = new__QExpressionNode();
+  x = Node__add(x, head);
+  while (tail->count) x = Node__add(x, Node__pop(tail, 0));
+  return x;
+}
+
 Node* builtin(Node* a, char* symbol) {
   if (strcmp("list", symbol) == 0) return builtin_list(a);
   if (strcmp("head", symbol) == 0) return builtin_head(a);
   if (strcmp("tail", symbol) == 0) return builtin_tail(a);
   if (strcmp("join", symbol) == 0) return builtin_join(a);
-  if (strcmp("eval", symbol) == 0) return builtin_eval(a);
+  if (strcmp("evaluate", symbol) == 0) return builtin_evaluate(a);
+  if (strcmp("construct", symbol) == 0) return builtin_construct(a);
   if (strstr("+-/*%", symbol)) return builtin_op(a, symbol);
   if (strcmp("add", symbol)      == 0 ||
       strcmp("subtract", symbol) == 0 ||

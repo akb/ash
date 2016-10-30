@@ -2,7 +2,7 @@
 
 #include "mpc.h"
 #include "grammar.h"
-#include "result.h"
+#include "node.h"
 #include "parser.h"
 
 AshParser* new__AshParser(void) {
