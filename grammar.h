@@ -10,7 +10,7 @@ static char* ASH_GRAMMAR =
   "         '/' | \"divide\"   |"
   "         '%' | \"modulo\"   |"
   "         \"list\" | \"head\" | \"tail\" | \"join\" | \"evaluate\" | "
-  "         \"length\" | \"construct\";"
+  "         \"initial\" | \"length\" | \"construct\";"
   "s_expression : '(' <expression>* ')' ;"
   "q_expression : '{' <expression>* '}' ;"
   "expression : <number> | <symbol> | <s_expression> | <q_expression> ;"

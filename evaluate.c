@@ -225,7 +225,6 @@ Node* builtin_construct(Node* a) {
 }
 
 Node* builtin_length(Node* a) {
-  printf("a->count %d\n", a->count);
   ASSERT_NODE_LENGTH(a, 1, "Function \"length\" requires a single argument");
   ASSERT_NODE(a, a->cell[0]->type == NODE_Q_EXPRESSION,
     "Function \"length\" requires a Q-expression as its only argument");
@@ -233,6 +232,19 @@ Node* builtin_length(Node* a) {
   long count = a->cell[0]->count;
   Node__free(a);
   return new__IntegerNode(count);
+}
+
+Node* builtin_initial(Node* a) {
+  ASSERT_NODE_LENGTH(a, 1, "Function \"length\" requires a single argument");
+  ASSERT_NODE(a, a->cell[0]->type == NODE_Q_EXPRESSION,
+    "Function \"length\" requires a Q-expression as its only argument");
+
+  Node* list = Node__pop(a, 0);
+  Node__free(a);
+
+  Node* x = new__QExpressionNode();
+  while (list->count > 1) x = Node__add(x, Node__pop(list, 0));
+  return x;
 }
 
 Node* builtin(Node* a, char* symbol) {
@@ -243,6 +255,7 @@ Node* builtin(Node* a, char* symbol) {
   if (strcmp("evaluate", symbol) == 0) return builtin_evaluate(a);
   if (strcmp("construct", symbol) == 0) return builtin_construct(a);
   if (strcmp("length", symbol) == 0) return builtin_length(a);
+  if (strcmp("initial", symbol) == 0) return builtin_initial(a);
   if (strstr("+-/*%", symbol)) return builtin_op(a, symbol);
   if (strcmp("add", symbol)      == 0 ||
       strcmp("subtract", symbol) == 0 ||

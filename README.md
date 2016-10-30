@@ -18,6 +18,7 @@ Added features:
 - Automatic type coercion between integers and floating-point numbers
 - "construct" (cons) builtin
 - "length" (len) builtin
+- "initial" builtin
 
 Problems that prevent this from being practical:
 - No Unicode support
