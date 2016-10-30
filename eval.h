@@ -1,13 +1,20 @@
 #include "result.h"
 #include "mpc.h"
 
-ResultValue* ResultValue__eval(ResultValue*);
-ResultValue* ResultValue__eval_s_expression(ResultValue*);
-ResultValue* ResultValue__pop(ResultValue*, int);
-ResultValue* ResultValue__take(ResultValue*, int);
-void NumberResultValue__negate_mutate(ResultValue*);
-void NumberResultValue__add_mutate(ResultValue*, ResultValue*);
-void NumberResultValue__subtract_mutate(ResultValue*, ResultValue*);
-void NumberResultValue__multiply_mutate(ResultValue*, ResultValue*);
-void NumberResultValue__divide_mutate(ResultValue*, ResultValue*);
-ResultValue* builtin_op(ResultValue*, char*);
+#define ASSERT_NODE(ARGS, COND, ERR) \
+  if (!(COND)) { \
+    Node__free(ARGS); \
+    return new__ErrorNode(ERR); \
+  }
+
+Node* Node__eval(Node*);
+Node* Node__eval_s_expression(Node*);
+Node* Node__pop(Node*, int);
+Node* Node__take(Node*, int);
+void NumberNode__negate_mutate(Node*);
+void NumberNode__add_mutate(Node*, Node*);
+void NumberNode__subtract_mutate(Node*, Node*);
+void NumberNode__multiply_mutate(Node*, Node*);
+void NumberNode__divide_mutate(Node*, Node*);
+Node* builtin_op(Node*, char*);
+Node* builtin(Node*, char*);

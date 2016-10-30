@@ -26,10 +26,10 @@ typedef struct AshParserStruct {
 
 AshParser* new__AshParser(void);
 void AshParser__free(AshParser* parser);
-ResultValue* FromIntegerAST__ResultValue(mpc_ast_t* t);
-ResultValue* FromDecimalAST__ResultValue(mpc_ast_t* t);
-ResultValue* FromSymbolAST__ResultVaule(mpc_ast_t* t);
-ResultValue* FromSExpression__ResultValue(mpc_ast_t* t);
-ResultValue* FromAST__ResultValue(mpc_ast_t* t);
-ResultValue* ResultValue__add(ResultValue* v, ResultValue* x);
+Node* FromIntegerAST__Node(mpc_ast_t* t);
+Node* FromDecimalAST__Node(mpc_ast_t* t);
+Node* FromSymbolAST__ResultVaule(mpc_ast_t* t);
+Node* FromSExpression__Node(mpc_ast_t* t);
+Node* FromAST__Node(mpc_ast_t* t);
+Node* Node__add(Node* v, Node* x);
 #endif

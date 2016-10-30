@@ -18,133 +18,133 @@ long dtol(double x) {
   return (long) (x-0.5);
 }
 
-ResultValue* new__IntegerResultValue(long x) {
-  ResultValue* v = malloc(sizeof(ResultValue));
-  v->type = RESULT_VALUE_INTEGER;
+Node* new__IntegerNode(long x) {
+  Node* v = malloc(sizeof(Node));
+  v->type = NODE_INTEGER;
   v->integer = x;
   return v;
 }
 
-ResultValue* new__DecimalResultValue(double x) {
-  ResultValue* v = malloc(sizeof(ResultValue));
-  v->type = RESULT_VALUE_DECIMAL;
+Node* new__DecimalNode(double x) {
+  Node* v = malloc(sizeof(Node));
+  v->type = NODE_DECIMAL;
   v->decimal = x;
   return v;
 }
 
-ResultValue* new__ErrorResultValue(char* error) {
-  ResultValue* v = malloc(sizeof(ResultValue));
-  v->type = RESULT_VALUE_ERROR;
+Node* new__ErrorNode(char* error) {
+  Node* v = malloc(sizeof(Node));
+  v->type = NODE_ERROR;
   v->error = malloc(strlen(error) + 1);
   strcpy(v->error, error); // TODO: null terminator?
   return v;
 }
 
-ResultValue* new__SymbolResultValue(char* symbol) {
-  ResultValue* v = malloc(sizeof(ResultValue));
-  v->type = RESULT_VALUE_SYMBOL;
+Node* new__SymbolNode(char* symbol) {
+  Node* v = malloc(sizeof(Node));
+  v->type = NODE_SYMBOL;
   v->symbol = malloc(strlen(symbol) + 1);
   strcpy(v->symbol, symbol); // TODO: null terminator?
   return v;
 }
 
-ResultValue* new__SExpressionResultValue(void) {
-  ResultValue* v = malloc(sizeof(ResultValue));
-  v->type = RESULT_VALUE_S_EXPRESSION;
+Node* new__SExpressionNode(void) {
+  Node* v = malloc(sizeof(Node));
+  v->type = NODE_S_EXPRESSION;
   v->count = 0;
   v->cell = NULL;
   return v;
 }
 
-ResultValue* new__QExpressionResultValue(void) {
-  ResultValue* v = malloc(sizeof(ResultValue));
-  v->type = RESULT_VALUE_Q_EXPRESSION;
+Node* new__QExpressionNode(void) {
+  Node* v = malloc(sizeof(Node));
+  v->type = NODE_Q_EXPRESSION;
   v->count = 0;
   v->cell = NULL;
   return v;
 }
 
-void ResultValue__free(ResultValue* v) {
+void Node__free(Node* v) {
   switch (v->type) {
-    case RESULT_VALUE_INTEGER: break;
-    case RESULT_VALUE_DECIMAL: break;
-    case RESULT_VALUE_ERROR:   free(v->error); break;
-    case RESULT_VALUE_SYMBOL:  free(v->symbol); break;
-    case RESULT_VALUE_Q_EXPRESSION:
-    case RESULT_VALUE_S_EXPRESSION:
+    case NODE_INTEGER: break;
+    case NODE_DECIMAL: break;
+    case NODE_ERROR:   free(v->error); break;
+    case NODE_SYMBOL:  free(v->symbol); break;
+    case NODE_Q_EXPRESSION:
+    case NODE_S_EXPRESSION:
       for (int i = 0; i < v->count; i++)
-        ResultValue__free(v->cell[i]);
+        Node__free(v->cell[i]);
       free(v->cell);
       break;
   }
   free(v);
 }
 
-void ResultValue__print(ResultValue* v) {
+void Node__print(Node* v) {
   switch (v->type) {
-    case RESULT_VALUE_INTEGER:
-      IntegerResultValue__print(v);
+    case NODE_INTEGER:
+      IntegerNode__print(v);
       break;
-    case RESULT_VALUE_DECIMAL:
-      DecimalResultValue__print(v);
+    case NODE_DECIMAL:
+      DecimalNode__print(v);
       break;
-    case RESULT_VALUE_SYMBOL:
-      SymbolResultValue__print(v);
+    case NODE_SYMBOL:
+      SymbolNode__print(v);
       break;
-    case RESULT_VALUE_S_EXPRESSION:
-      ExpressionResultValue__print(v, '(', ')');
+    case NODE_S_EXPRESSION:
+      ExpressionNode__print(v, '(', ')');
       break;
-    case RESULT_VALUE_Q_EXPRESSION:
-      ExpressionResultValue__print(v, '{', '}');
+    case NODE_Q_EXPRESSION:
+      ExpressionNode__print(v, '{', '}');
       break;
-    case RESULT_VALUE_ERROR:
-      ErrorResultValue__print(v);
+    case NODE_ERROR:
+      ErrorNode__print(v);
       break;
   }
 }
 
-void IntegerResultValue__print(ResultValue* v) {
+void IntegerNode__print(Node* v) {
   printf("%li", v->integer);
 }
 
-void DecimalResultValue__print(ResultValue* v) {
+void DecimalNode__print(Node* v) {
   printf("%g", v->decimal);
 }
 
-void SymbolResultValue__print(ResultValue* v) {
+void SymbolNode__print(Node* v) {
   printf("%s", v->symbol);
 }
 
-void ExpressionResultValue__print(ResultValue* v, char open, char close) {
+void ExpressionNode__print(Node* v, char open, char close) {
   putchar(open);
   for (int i = 0; i < v->count; i++) {
-    ResultValue__print(v->cell[i]);
+    Node__print(v->cell[i]);
     if (i != (v->count - 1)) putchar(' ');
   }
   putchar(close);
 }
 
-void ErrorResultValue__print(ResultValue* v) {
+void ErrorNode__print(Node* v) {
   fprintf(stderr, "Error: %s", v->error);
 }
 
-void ResultValue__println(ResultValue* v) {
-  ResultValue__print(v);
+void Node__println(Node* v) {
+  Node__print(v);
   putchar('\n');
 }
 
-double ResultValue__to_double(ResultValue* v) {
+double Node__to_double(Node* v) {
   switch (v->type) {
-    case RESULT_VALUE_INTEGER: return (double)v->integer;
-    case RESULT_VALUE_DECIMAL: return v->decimal;
+    case NODE_INTEGER: return (double)v->integer;
+    case NODE_DECIMAL: return v->decimal;
     default: return 0;
   }
 }
 
-long ResultValue__to_long(ResultValue* v) {
+long Node__to_long(Node* v) {
   switch (v->type) {
-    case RESULT_VALUE_INTEGER: return v->integer;
-    case RESULT_VALUE_DECIMAL: return dtol(v->decimal);
+    case NODE_INTEGER: return v->integer;
+    case NODE_DECIMAL: return dtol(v->decimal);
     default: return 0;
   }
 }

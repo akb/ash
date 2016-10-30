@@ -1,126 +1,126 @@
-#ifndef RESULT_VALUE_TYPE_DEFINED
-#define RESULT_VALUE_TYPE_DEFINED
+#ifndef NODE_TYPE_DEFINED
+#define NODE_TYPE_DEFINED
 /**
- * RESULT_VALUE_INTEGER
- * Indicates that the ResultValue contains an integer
+ * NODE_INTEGER
+ * Indicates that the Node contains an integer
  *
- * RESULT_VALUE_DECIMAL
- * Indicates that the ResultValue contains a decimal number
+ * NODE_DECIMAL
+ * Indicates that the Node contains a decimal number
  *
- * RESULT_VALUE_ERROR
- * Indicates that the ResultValue contains an error
+ * NODE_ERROR
+ * Indicates that the Node contains an error
  */
 enum {
-  RESULT_VALUE_SYMBOL,
-  RESULT_VALUE_S_EXPRESSION,
-  RESULT_VALUE_Q_EXPRESSION,
-  RESULT_VALUE_INTEGER,
-  RESULT_VALUE_DECIMAL,
-  RESULT_VALUE_ERROR
+  NODE_SYMBOL,
+  NODE_S_EXPRESSION,
+  NODE_Q_EXPRESSION,
+  NODE_INTEGER,
+  NODE_DECIMAL,
+  NODE_ERROR
 };
 
-typedef struct ResultValueStruct {
+typedef struct NodeStruct {
   int    type;
   long   integer;
   double decimal;
   char*  error;
   char*  symbol;
   int    count;
-  struct ResultValueStruct** cell;
-} ResultValue;
+  struct NodeStruct** cell;
+} Node;
 
 /**
- * new__IntegerResultValue
- * Constructs a new ResultValue struct containing a long integer
+ * new__IntegerNode
+ * Constructs a new Node struct containing a long integer
  */
-ResultValue* new__IntegerResultValue(long);
+Node* new__IntegerNode(long);
 
 /**
- * new__ErrorResultValue
- * Constructs a new ResultValue struct containing an error
+ * new__ErrorNode
+ * Constructs a new Node struct containing an error
  */
-ResultValue* new__ErrorResultValue(char*);
+Node* new__ErrorNode(char*);
 
 /**
- * new__DecimalResultValue
- * Constructs a new ResultValue struct containing a double precision floating
+ * new__DecimalNode
+ * Constructs a new Node struct containing a double precision floating
  * point number
  */
-ResultValue* new__DecimalResultValue(double);
+Node* new__DecimalNode(double);
 
 /**
- * new__SymbolResultValue
- * Constructs a new ResultValue struct containing a symbol
+ * new__SymbolNode
+ * Constructs a new Node struct containing a symbol
  */
-ResultValue* new__SymbolResultValue(char*);
+Node* new__SymbolNode(char*);
 
 /**
- * new__SExpressionResultValue
- * Constructs a new ResultValue struct containing an empty S-Expression
+ * new__SExpressionNode
+ * Constructs a new Node struct containing an empty S-Expression
  */
-ResultValue* new__SExpressionResultValue(void);
+Node* new__SExpressionNode(void);
 
 /**
- * new__QExpressionResultValue
- * Constructs a new ResultValue struct containing an empty Q-Expression
+ * new__QExpressionNode
+ * Constructs a new Node struct containing an empty Q-Expression
  */
-ResultValue* new__QExpressionResultValue(void);
+Node* new__QExpressionNode(void);
 
 
 /**
- * ResultValue__free
- * Frees any memory allocated to the passed-in ResultValue, deleting the
- * ResultValue
+ * Node__free
+ * Frees any memory allocated to the passed-in Node, deleting the
+ * Node
  */
-void ResultValue__free(ResultValue*);
+void Node__free(Node*);
 
 /**
- * ResultValue__print
- * Prints the passed-in ResultValue to STDOUT
+ * Node__print
+ * Prints the passed-in Node to STDOUT
  */
-void ResultValue__print(ResultValue*);
+void Node__print(Node*);
 
 /**
- * IntegerResultValue__print
- * Prints the passed-in ResultValue containing an integer to STDOUT
+ * IntegerNode__print
+ * Prints the passed-in Node containing an integer to STDOUT
  */
-void IntegerResultValue__print(ResultValue*);
+void IntegerNode__print(Node*);
 
 /**
- * DecimalResultValue__print
- * Prints the passed-in ResultValue containing a decimal number to STDOUT
+ * DecimalNode__print
+ * Prints the passed-in Node containing a decimal number to STDOUT
  */
-void DecimalResultValue__print(ResultValue*);
+void DecimalNode__print(Node*);
 
 /**
- * ErrorResultValue__print
- * Prints the passed-in ResultValue containing an error to STDOUT
+ * ErrorNode__print
+ * Prints the passed-in Node containing an error to STDOUT
  */
-void ErrorResultValue__print(ResultValue*);
+void ErrorNode__print(Node*);
 
 /**
- * SymbolResultValue__print
- * Prints the passed-in ResultValue containing a symbol to STDOUT
+ * SymbolNode__print
+ * Prints the passed-in Node containing a symbol to STDOUT
  */
-void SymbolResultValue__print(ResultValue*);
+void SymbolNode__print(Node*);
 
 /**
- * ExpressionResultValue__print
- * Prints the passed-in ResultValue containing an expression to STDOUT
+ * ExpressionNode__print
+ * Prints the passed-in Node containing an expression to STDOUT
  */
-void ExpressionResultValue__print(ResultValue*, char, char);
+void ExpressionNode__print(Node*, char, char);
 
 /**
- * ResultValue__println
- * Prints the passed-in ResultValue to STDOUT followed by a newline
+ * Node__println
+ * Prints the passed-in Node to STDOUT followed by a newline
  */
-void ResultValue__println(ResultValue*);
-
-/**
- */
-double ResultValue__to_double(ResultValue*);
+void Node__println(Node*);
 
 /**
  */
-long ResultValue__to_long(ResultValue*);
+double Node__to_double(Node*);
+
+/**
+ */
+long Node__to_long(Node*);
 #endif
