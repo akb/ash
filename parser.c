@@ -12,23 +12,24 @@ AshParser* new__AshParser(void) {
   parser->number       = mpc_new(PARSER_TAG_NUMBER);
   parser->symbol       = mpc_new(PARSER_TAG_SYMBOL);
   parser->s_expression = mpc_new(PARSER_TAG_S_EXPRESSION);
+  parser->q_expression = mpc_new(PARSER_TAG_Q_EXPRESSION);
   parser->expression   = mpc_new(PARSER_TAG_EXPRESSION);
   parser->ash          = mpc_new(PARSER_TAG_ASH);
 
   mpca_lang(MPCA_LANG_DEFAULT, ASH_GRAMMAR,
     parser->decimal, parser->integer, parser->number,
-    parser->symbol, parser->s_expression, parser->expression,
-    parser->ash
+    parser->symbol, parser->s_expression, parser->q_expression,
+    parser->expression, parser->ash
   );
 
   return parser;
 }
 
 void AshParser__free(AshParser* parser) {
-  mpc_cleanup(7,
+  mpc_cleanup(8,
     parser->decimal, parser->integer, parser->number,
-    parser->symbol, parser->s_expression, parser->expression,
-    parser->ash);
+    parser->symbol, parser->s_expression, parser->q_expression,
+    parser->expression, parser->ash);
   free(parser);
 }
 
@@ -52,15 +53,17 @@ ResultValue* FromDecimalAST__ResultValue(mpc_ast_t* t) { // lval_read_number
 ResultValue* FromAST__ResultValue(mpc_ast_t* t) { // lval_read
   if (strstr(t->tag, PARSER_TAG_INTEGER))
     return FromIntegerAST__ResultValue(t);
-  if (strstr(t->tag, PARSER_TAG_DECIMAL))
+  else if (strstr(t->tag, PARSER_TAG_DECIMAL))
     return FromDecimalAST__ResultValue(t);
-  if (strstr(t->tag, PARSER_TAG_SYMBOL))
+  else if (strstr(t->tag, PARSER_TAG_SYMBOL))
     return new__SymbolResultValue(t->contents);
 
   ResultValue* x = NULL;
   if (strcmp(t->tag, PARSER_TAG_ROOT) == 0)
     x = new__SExpressionResultValue();
-  if (strstr(t->tag, PARSER_TAG_S_EXPRESSION))
+  else if (strstr(t->tag, PARSER_TAG_Q_EXPRESSION))
+    x = new__QExpressionResultValue();
+  else if (strstr(t->tag, PARSER_TAG_S_EXPRESSION))
     x = new__SExpressionResultValue();
 
   for (int i = 0; i < t->children_num; i++) {

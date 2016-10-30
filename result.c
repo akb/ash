@@ -56,12 +56,21 @@ ResultValue* new__SExpressionResultValue(void) {
   return v;
 }
 
+ResultValue* new__QExpressionResultValue(void) {
+  ResultValue* v = malloc(sizeof(ResultValue));
+  v->type = RESULT_VALUE_Q_EXPRESSION;
+  v->count = 0;
+  v->cell = NULL;
+  return v;
+}
+
 void ResultValue__free(ResultValue* v) {
   switch (v->type) {
     case RESULT_VALUE_INTEGER: break;
     case RESULT_VALUE_DECIMAL: break;
     case RESULT_VALUE_ERROR:   free(v->error); break;
     case RESULT_VALUE_SYMBOL:  free(v->symbol); break;
+    case RESULT_VALUE_Q_EXPRESSION:
     case RESULT_VALUE_S_EXPRESSION:
       for (int i = 0; i < v->count; i++)
         ResultValue__free(v->cell[i]);
@@ -83,7 +92,10 @@ void ResultValue__print(ResultValue* v) {
       SymbolResultValue__print(v);
       break;
     case RESULT_VALUE_S_EXPRESSION:
-      SExpressionResultValue__print(v, '(', ')');
+      ExpressionResultValue__print(v, '(', ')');
+      break;
+    case RESULT_VALUE_Q_EXPRESSION:
+      ExpressionResultValue__print(v, '{', '}');
       break;
     case RESULT_VALUE_ERROR:
       ErrorResultValue__print(v);
@@ -103,7 +115,7 @@ void SymbolResultValue__print(ResultValue* v) {
   printf("%s", v->symbol);
 }
 
-void SExpressionResultValue__print(ResultValue* v, char open, char close) {
+void ExpressionResultValue__print(ResultValue* v, char open, char close) {
   putchar(open);
   for (int i = 0; i < v->count; i++) {
     ResultValue__print(v->cell[i]);

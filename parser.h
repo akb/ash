@@ -8,7 +8,8 @@
 #define PARSER_TAG_INTEGER      "integer"
 #define PARSER_TAG_NUMBER       "number"
 #define PARSER_TAG_SYMBOL       "symbol"
-#define PARSER_TAG_S_EXPRESSION "sexpression"
+#define PARSER_TAG_S_EXPRESSION "s_expression"
+#define PARSER_TAG_Q_EXPRESSION "q_expression"
 #define PARSER_TAG_EXPRESSION   "expression"
 #define PARSER_TAG_ASH          "ash"
 
@@ -18,6 +19,7 @@ typedef struct AshParserStruct {
   mpc_parser_t* number;
   mpc_parser_t* symbol;
   mpc_parser_t* s_expression;
+  mpc_parser_t* q_expression;
   mpc_parser_t* expression;
   mpc_parser_t* ash;
 } AshParser;

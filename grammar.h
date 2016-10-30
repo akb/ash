@@ -9,7 +9,8 @@ static char* ASH_GRAMMAR =
   "         '*' | \"multiply\" |"
   "         '/' | \"divide\"   |"
   "         '%' | \"modulo\"   ;"
-  "sexpression : '(' <expression>* ')' ;"
-  "expression : <number> | <symbol> | <sexpression> ;"
+  "s_expression : '(' <expression>* ')' ;"
+  "q_expression : '{' <expression>* '}' ;"
+  "expression : <number> | <symbol> | <s_expression> | <q_expression> ;"
   "ash        : /^/ <expression>* /$/ ;";
 #endif
