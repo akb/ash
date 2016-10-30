@@ -12,8 +12,8 @@
 
 #include "mpc.h"
 #include "parser.h"
-#include "result.h"
-#include "eval.h"
+#include "node.h"
+#include "evaluate.h"
 
 void print_startup_message(void);
 
@@ -28,9 +28,10 @@ int main(int argc, char** argv) {
 
     mpc_result_t r;
     if (mpc_parse("<stdin>", input, parser->ash, &r)) {
-      ResultValue* result = ResultValue__eval(FromAST__ResultValue(r.output));
-      ResultValue__println(result);
-      ResultValue__free(result);
+      //mpc_ast_print(r.output);
+      Node* result = Node__evaluate(FromAST__Node(r.output));
+      Node__println(result);
+      Node__free(result);
       mpc_ast_delete(r.output);
     } else {
       mpc_err_print(r.error);

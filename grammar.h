@@ -8,8 +8,11 @@ static char* ASH_GRAMMAR =
   "         '-' | \"subtract\" |"
   "         '*' | \"multiply\" |"
   "         '/' | \"divide\"   |"
-  "         '%' | \"modulo\"   ;"
-  "sexpression : '(' <expression>* ')' ;"
-  "expression : <number> | <symbol> | <sexpression> ;"
+  "         '%' | \"modulo\"   |"
+  "         \"list\" | \"head\" | \"tail\" | \"join\" | \"evaluate\" | "
+  "         \"length\" | \"construct\";"
+  "s_expression : '(' <expression>* ')' ;"
+  "q_expression : '{' <expression>* '}' ;"
+  "expression : <number> | <symbol> | <s_expression> | <q_expression> ;"
   "ash        : /^/ <expression>* /$/ ;";
 #endif
