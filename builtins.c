@@ -168,3 +168,18 @@ Node* builtin_define(Environment* e, Node* a) {
   Node__free(a);
   return new__SExpressionNode();
 }
+
+Node* builtin_environment(Environment* e, Node* a) {
+  ASSERT_ARGUMENT_COUNT("environment", a, 0);
+
+  Node* list = new__QExpressionNode();
+  for (int i = 0; i < e->count; i++) {
+    Node* pair = new__QExpressionNode();
+    Node__add(pair, new__SymbolNode(e->symbols[i]));
+    Node__add(pair, e->nodes[i]);
+    Node__add(list, pair);
+  }
+
+  Node__free(a);
+  return list;
+}

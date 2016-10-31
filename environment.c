@@ -65,6 +65,7 @@ void Environment__add_builtin(Environment* e, char* name, BuiltIn function) {
 
 void Environment__add_builtins(Environment* e) {
   Environment__add_builtin(e, "define", builtin_define);
+  Environment__add_builtin(e, "environment", builtin_environment);
 
   Environment__add_builtin(e, "list", builtin_list);
   Environment__add_builtin(e, "head", builtin_head);

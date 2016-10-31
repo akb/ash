@@ -190,12 +190,12 @@ long Node__to_long(Node* v) {
 }
 
 Node* Node__evaluate(Environment* e, Node* v) {
-  if (v->type == NODE_SYMBOL) {
+  if (v->type == NODE_S_EXPRESSION) {
+    return Node__evaluate_s_expression(e, v);
+  } else if (v->type == NODE_SYMBOL) {
     Node* x = Environment__get(e, v);
     Node__free(v);
     return x;
-  } else if (v->type == NODE_S_EXPRESSION) {
-    return Node__evaluate_s_expression(e, v);
   } else {
     return v;
   }
@@ -210,7 +210,9 @@ Node* Node__evaluate_s_expression(Environment* e, Node* v) {
       return Node__take(v, i);
 
   if (v->count == 0) return v;
-  if (v->count == 1) return Node__take(v, 0);
+  if (v->count == 1 && v->cell[0]->type != NODE_FUNCTION) {
+    return Node__take(v, 0);
+  }
 
   Node* f = Node__pop(v, 0);
   if (f->type != NODE_FUNCTION) {

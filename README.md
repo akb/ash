@@ -20,10 +20,11 @@ Added features:
 - "construct" (cons) builtin
 - "length" (len) builtin
 - "initial" builtin
+- Named functions
+- "environment" builtin
 
 Problems that prevent this from being practical:
 - No Unicode support
 - S-expressions are variable arrays instead of linked-lists/cons cells
-- No user-defined symbols
 - No conditionals
 - No loops/recursion
