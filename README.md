@@ -8,6 +8,7 @@ Features from book:
 - S-Expressions
 - Q-Expressions
 - Builtin functions for Q-Expressions (list, head, tail, join, evaluate)
+- Values may be bound to symbols using 'define' builtin
 
 Added features:
 - Modular codebase
