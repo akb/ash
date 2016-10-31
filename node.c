@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <assert.h>
 #include <limits.h>
@@ -18,6 +19,19 @@ long dtol(double x) {
   return (long) (x-0.5);
 }
 
+char* NodeType__name(int type) {
+  switch (type) {
+    case NODE_SYMBOL:       return "symbol";
+    case NODE_S_EXPRESSION: return "s_expression";
+    case NODE_Q_EXPRESSION: return "q_expression";
+    case NODE_INTEGER:      return "integer";
+    case NODE_DECIMAL:      return "decimal";
+    case NODE_ERROR:        return "error";
+    case NODE_FUNCTION:     return "function";
+    default:                return "unknown";
+  }
+}
+
 Node* new__IntegerNode(long x) {
   Node* v = malloc(sizeof(Node));
   v->type = NODE_INTEGER;
@@ -32,11 +46,18 @@ Node* new__DecimalNode(double x) {
   return v;
 }
 
-Node* new__ErrorNode(char* error) {
+Node* new__ErrorNode(char* fmt, ...) {
   Node* v = malloc(sizeof(Node));
   v->type = NODE_ERROR;
-  v->error = malloc(strlen(error) + 1);
-  strcpy(v->error, error); // TODO: null terminator?
+
+  va_list va;
+  va_start(va, fmt);
+
+  v->error = malloc(512);
+  vsnprintf(v->error, 511, fmt, va);
+  v->error = realloc(v->error, strlen(v->error) + 1);
+
+  va_end(va);
   return v;
 }
 

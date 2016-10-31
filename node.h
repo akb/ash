@@ -2,16 +2,29 @@
 #define NODE_TYPE_DEFINED
 #include "environment.h"
 
-#define ASSERT_NODE(ARGS, COND, ERR) \
+#define ASSERT_ARGUMENT(ARGS, COND, FMT, ...) \
   if (!(COND)) { \
+    Node* error = new__ErrorNode(FMT, ##__VA_ARGS__); \
     Node__free(ARGS); \
-    return new__ErrorNode(ERR); \
+    return error; \
   }
 
-#define ASSERT_NODE_LENGTH(ARGS, COUNT, ERR) \
+#define ASSERT_ARGUMENT_COUNT(NAME, ARGS, COUNT) \
   if (ARGS->count != COUNT) { \
+    Node* error = new__ErrorNode( \
+      "Function '%s' was passed wrong number of arguments. Expected %i got %i.", \
+      NAME, COUNT, ARGS->count); \
     Node__free(ARGS); \
-    return new__ErrorNode(ERR); \
+    return error; \
+  }
+
+#define ASSERT_ARGUMENT_TYPE(NAME, ARGS, POS, TYPE) \
+  if (ARGS->cell[POS]->type != TYPE) { \
+    Node* error = new__ErrorNode( \
+      "Wrong argument type passed to %s, position %i. Expected %s, got %s.", \
+      NAME, POS, NodeType__name(TYPE), NodeType__name(ARGS->cell[POS]->type)); \
+    Node__free(ARGS); \
+    return error; \
   }
 
 /**
@@ -45,6 +58,8 @@ typedef struct NodeStruct {
   struct  NodeStruct** cell;
 } Node;
 
+char* NodeType__name(int);
+
 /**
  * new__IntegerNode
  * Constructs a new Node struct containing a long integer
@@ -55,7 +70,7 @@ Node* new__IntegerNode(long);
  * new__ErrorNode
  * Constructs a new Node struct containing an error
  */
-Node* new__ErrorNode(char*);
+Node* new__ErrorNode(char*, ...);
 
 /**
  * new__DecimalNode

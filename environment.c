@@ -31,10 +31,7 @@ Node* Environment__get(Environment* e, Node* k) {
   for (int i = 0; i < e->count; i++)
     if (strcmp(e->symbols[i], k->symbol) == 0)
       return Node__copy(e->nodes[i]);
-  char* format = "Undefined symbol %s";
-  char message[strlen(k->symbol) + strlen(format) - 1];
-  sprintf(message, format, k->symbol);
-  return new__ErrorNode(message);
+  return new__ErrorNode("Undefined symbol '%s'", k->symbol);
 }
 
 void Environment__put(Environment* e, Node* k, Node* v) {

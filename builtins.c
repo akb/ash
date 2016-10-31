@@ -9,7 +9,7 @@ Node* builtin_op(Environment* e, Node* a, char* op) {
     if (a->cell[i]->type != NODE_INTEGER &&
         a->cell[i]->type != NODE_DECIMAL) {
       Node__free(a);
-      return new__ErrorNode("Cannot operate on non-number.");
+      return new__ErrorNode("Cannot call '%s' on non-number", op);
     }
   }
 
@@ -28,12 +28,8 @@ Node* builtin_op(Environment* e, Node* a, char* op) {
     if (strcmp(op, "*") == 0 || strcmp(op, "multiply") == 0)
       NumberNode__multiply_mutate(x, y);
     if (strcmp(op, "/") == 0 || strcmp(op, "divide") == 0) {
-      if (y->type == NODE_INTEGER && y->integer == 0) {
-        Node__free(x);
-        Node__free(y);
-        x = new__ErrorNode("Cannot divide by zero.");
-        break;
-      } else if (y->type == NODE_DECIMAL && y->decimal == 0.0) {
+      if ((y->type == NODE_INTEGER && y->integer == 0) ||
+          (y->type == NODE_DECIMAL && y->decimal == 0.0)) {
         Node__free(x);
         Node__free(y);
         x = new__ErrorNode("Cannot divide by zero.");
@@ -71,10 +67,9 @@ Node* builtin_modulo(Environment* e, Node* a) {
 }
 
 Node* builtin_head(Environment* e, Node* a) {
-  ASSERT_NODE_LENGTH(a, 1, "Function \"head\" only accepts one argument");
-  ASSERT_NODE(a, a->cell[0]->type == NODE_Q_EXPRESSION,
-    "Function \"head\" only operates on Q-expressions");
-  ASSERT_NODE(a, a->cell[0]->count != 0,
+  ASSERT_ARGUMENT_COUNT("head", a, 1);
+  ASSERT_ARGUMENT_TYPE("head", a, 0, NODE_Q_EXPRESSION);
+  ASSERT_ARGUMENT(a, a->cell[0]->count != 0,
     "Function \"head\" was passed {}");
 
   Node* v = Node__take(a, 0);
@@ -84,10 +79,9 @@ Node* builtin_head(Environment* e, Node* a) {
 }
 
 Node* builtin_tail(Environment* e, Node* a) {
-  ASSERT_NODE_LENGTH(a, 1, "Function \"tail\" only accepts one argument");
-  ASSERT_NODE(a, a->cell[0]->type == NODE_Q_EXPRESSION,
-    "Function \"tail\" only operates on Q-expressions");
-  ASSERT_NODE(a, a->cell[0]->count != 0,
+  ASSERT_ARGUMENT_COUNT("tail", a, 1);
+  ASSERT_ARGUMENT_TYPE("tail", a, 0, NODE_Q_EXPRESSION);
+  ASSERT_ARGUMENT(a, a->cell[0]->count != 0,
     "Function \"tail\" was passed {}");
 
   Node* v = Node__take(a, 0);
@@ -101,9 +95,8 @@ Node* builtin_list(Environment* e, Node* a) {
 }
 
 Node* builtin_evaluate(Environment* e, Node* a) {
-  ASSERT_NODE_LENGTH(a, 1, "Function \"evaluate\" only accepts one argument");
-  ASSERT_NODE(a, a->cell[0]->type == NODE_Q_EXPRESSION,
-    "Function \"evaluate\" only operates on Q-expressions");
+  ASSERT_ARGUMENT_COUNT("evaluate", a, 1);
+  ASSERT_ARGUMENT_TYPE("evaluate", a, 0, NODE_Q_EXPRESSION);
 
   Node* x = Node__take(a, 0);
   x->type = NODE_S_EXPRESSION;
@@ -112,8 +105,7 @@ Node* builtin_evaluate(Environment* e, Node* a) {
 
 Node* builtin_join(Environment* e, Node* a) {
   for (int i = 0; i < a->count; i++) {
-    ASSERT_NODE(a, a->cell[i]->type == NODE_Q_EXPRESSION,
-      "Function \"join\" passed an invalid type");
+    ASSERT_ARGUMENT_TYPE("join", a, i, NODE_Q_EXPRESSION);
   }
 
   Node* x = Node__pop(a, 0);
@@ -124,9 +116,8 @@ Node* builtin_join(Environment* e, Node* a) {
 }
 
 Node* builtin_construct(Environment* e, Node* a) {
-  ASSERT_NODE_LENGTH(a, 2, "Function \"construct\" requires two arguments");
-  ASSERT_NODE(a, a->cell[1]->type == NODE_Q_EXPRESSION,
-    "Function \"construct\" requires a Q-expression as its second argument");
+  ASSERT_ARGUMENT_COUNT("construct", a, 2);
+  ASSERT_ARGUMENT_TYPE("construct", a, 1, NODE_Q_EXPRESSION);
 
   Node* head = Node__pop(a, 0);
   Node* tail = Node__pop(a, 0);
@@ -138,9 +129,8 @@ Node* builtin_construct(Environment* e, Node* a) {
 }
 
 Node* builtin_length(Environment* e, Node* a) {
-  ASSERT_NODE_LENGTH(a, 1, "Function \"length\" requires a single argument");
-  ASSERT_NODE(a, a->cell[0]->type == NODE_Q_EXPRESSION,
-    "Function \"length\" requires a Q-expression as its only argument");
+  ASSERT_ARGUMENT_COUNT("construct", a, 1);
+  ASSERT_ARGUMENT_TYPE("construct", a, 0, NODE_Q_EXPRESSION);
 
   long count = a->cell[0]->count;
   Node__free(a);
@@ -148,9 +138,8 @@ Node* builtin_length(Environment* e, Node* a) {
 }
 
 Node* builtin_initial(Environment* e, Node* a) {
-  ASSERT_NODE_LENGTH(a, 1, "Function \"length\" requires a single argument");
-  ASSERT_NODE(a, a->cell[0]->type == NODE_Q_EXPRESSION,
-    "Function \"length\" requires a Q-expression as its only argument");
+  ASSERT_ARGUMENT_COUNT("initial", a, 1);
+  ASSERT_ARGUMENT_TYPE("initial", a, 0, NODE_Q_EXPRESSION);
 
   Node* list = Node__pop(a, 0);
   Node__free(a);
@@ -161,17 +150,15 @@ Node* builtin_initial(Environment* e, Node* a) {
 }
 
 Node* builtin_define(Environment* e, Node* a) {
-  ASSERT_NODE(a, a->cell[0]->type == NODE_Q_EXPRESSION,
-    "The first argument passed to 'define' must be a list of symbols");
+  ASSERT_ARGUMENT_TYPE("define", a, 0, NODE_Q_EXPRESSION);
 
   Node* symbols = a->cell[0];
 
   for (int i = 0; i < symbols->count - 1; i++) {
-    ASSERT_NODE(a, symbols->cell[i]->type == NODE_SYMBOL,
-      "cannot define a non-symbol as an argument");
+    ASSERT_ARGUMENT_TYPE("define", symbols, i, NODE_SYMBOL);
   }
 
-  ASSERT_NODE(a, symbols->count == a->count - 1,
+  ASSERT_ARGUMENT(a, symbols->count == a->count - 1,
     "incorrect number of arguments");
 
   for (int i = 0; i < symbols->count; i++) {
