@@ -1,117 +1,10 @@
 #include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
+#include <strings.h>
 
-#include "parser.h"
-#include "evaluate.h"
-#include "errors.h"
+#include "environment.h"
+#include "node.h"
 
-Node* Node__evaluate_s_expression(Node* v) {
-  for (int i = 0; i < v->count; i++)
-    v->cell[i] = Node__evaluate(v->cell[i]);
-
-  for (int i = 0; i < v->count; i++)
-    if (v->cell[i]->type == NODE_ERROR)
-      return Node__take(v, i);
-
-  if (v->count == 0) return v;
-  if (v->count == 1) return Node__take(v, 0);
-
-  Node* f = Node__pop(v, 0);
-  if (f->type != NODE_SYMBOL) {
-    Node__free(f);
-    Node__free(v);
-    return new__ErrorNode("S-Expression does not begin with a symbol.");
-  }
-
-  Node* result = builtin(v, f->symbol);
-  Node__free(f);
-  return result;
-}
-
-Node* Node__evaluate(Node* v) {
-  if (v->type == NODE_S_EXPRESSION)
-    return Node__evaluate_s_expression(v);
-  else
-    return v;
-}
-
-Node* Node__pop(Node* v, int i) {
-  Node* x = v->cell[i];
-  memmove(&v->cell[i], &v->cell[i+1], sizeof(Node*) * (v->count-i-1));
-  v->count--;
-  v->cell = realloc(v->cell, sizeof(Node*) * v->count);
-  return x;
-}
-
-Node* Node__take(Node* v, int i) {
-  Node* x = Node__pop(v, i);
-  Node__free(v);
-  return x;
-}
-
-Node* Node__join(Node* x, Node* y) {
-  while (y->count) x = Node__add(x, Node__pop(y, 0));
-  Node__free(y);
-  return x;
-}
-
-void NumberNode__negate_mutate(Node* v) {
-  switch (v->type) {
-    case NODE_INTEGER:
-      v->integer = -v->integer;
-      return;
-    case NODE_DECIMAL:
-      v->decimal = -v->decimal;
-      return;
-  }
-}
-
-void NumberNode__add_mutate(Node* v, Node* x) {
-  switch (v->type) {
-    case NODE_INTEGER:
-      v->integer += x->integer;
-      return;
-    case NODE_DECIMAL:
-      v->decimal += x->decimal;
-      return;
-  }
-}
-
-void NumberNode__subtract_mutate(Node* v, Node* x) {
-  switch (v->type) {
-    case NODE_INTEGER:
-      v->integer -= x->integer;
-      return;
-    case NODE_DECIMAL:
-      v->decimal -= x->decimal;
-      return;
-  }
-}
-
-void NumberNode__multiply_mutate(Node* v, Node* x) {
-  switch (v->type) {
-    case NODE_INTEGER:
-      v->integer *= x->integer;
-      return;
-    case NODE_DECIMAL:
-      v->decimal *= x->decimal;
-      return;
-  }
-}
-
-void NumberNode__divide_mutate(Node* v, Node* x) {
-  switch (v->type) {
-    case NODE_INTEGER:
-      v->integer /= x->integer;
-      return;
-    case NODE_DECIMAL:
-      v->decimal /= x->decimal;
-      return;
-  }
-}
-
-Node* builtin_op(Node* a, char* op) {
+Node* builtin_op(Environment* e, Node* a, char* op) {
   for (int i = 0; i < a->count; i++) {
     if (a->cell[i]->type != NODE_INTEGER &&
         a->cell[i]->type != NODE_DECIMAL) {
@@ -157,7 +50,27 @@ Node* builtin_op(Node* a, char* op) {
   return x;
 }
 
-Node* builtin_head(Node* a) {
+Node* builtin_add(Environment* e, Node* a) {
+  return builtin_op(e, a, "+");
+}
+
+Node* builtin_subtract(Environment* e, Node* a) {
+  return builtin_op(e, a, "-");
+}
+
+Node* builtin_multiply(Environment* e, Node* a) {
+  return builtin_op(e, a, "*");
+}
+
+Node* builtin_divide(Environment* e, Node* a) {
+  return builtin_op(e, a, "/");
+}
+
+Node* builtin_modulo(Environment* e, Node* a) {
+  return builtin_op(e, a, "%");
+}
+
+Node* builtin_head(Environment* e, Node* a) {
   ASSERT_NODE_LENGTH(a, 1, "Function \"head\" only accepts one argument");
   ASSERT_NODE(a, a->cell[0]->type == NODE_Q_EXPRESSION,
     "Function \"head\" only operates on Q-expressions");
@@ -170,7 +83,7 @@ Node* builtin_head(Node* a) {
   return v;
 }
 
-Node* builtin_tail(Node* a) {
+Node* builtin_tail(Environment* e, Node* a) {
   ASSERT_NODE_LENGTH(a, 1, "Function \"tail\" only accepts one argument");
   ASSERT_NODE(a, a->cell[0]->type == NODE_Q_EXPRESSION,
     "Function \"tail\" only operates on Q-expressions");
@@ -182,22 +95,22 @@ Node* builtin_tail(Node* a) {
   return v;
 }
 
-Node* builtin_list(Node* a) {
+Node* builtin_list(Environment* e, Node* a) {
   a->type = NODE_Q_EXPRESSION;
   return a;
 }
 
-Node* builtin_evaluate(Node* a) {
+Node* builtin_evaluate(Environment* e, Node* a) {
   ASSERT_NODE_LENGTH(a, 1, "Function \"evaluate\" only accepts one argument");
   ASSERT_NODE(a, a->cell[0]->type == NODE_Q_EXPRESSION,
     "Function \"evaluate\" only operates on Q-expressions");
 
   Node* x = Node__take(a, 0);
   x->type = NODE_S_EXPRESSION;
-  return Node__evaluate(x);
+  return Node__evaluate(e, x);
 }
 
-Node* builtin_join(Node* a) {
+Node* builtin_join(Environment* e, Node* a) {
   for (int i = 0; i < a->count; i++) {
     ASSERT_NODE(a, a->cell[i]->type == NODE_Q_EXPRESSION,
       "Function \"join\" passed an invalid type");
@@ -210,7 +123,7 @@ Node* builtin_join(Node* a) {
   return x;
 }
 
-Node* builtin_construct(Node* a) {
+Node* builtin_construct(Environment* e, Node* a) {
   ASSERT_NODE_LENGTH(a, 2, "Function \"construct\" requires two arguments");
   ASSERT_NODE(a, a->cell[1]->type == NODE_Q_EXPRESSION,
     "Function \"construct\" requires a Q-expression as its second argument");
@@ -224,7 +137,7 @@ Node* builtin_construct(Node* a) {
   return x;
 }
 
-Node* builtin_length(Node* a) {
+Node* builtin_length(Environment* e, Node* a) {
   ASSERT_NODE_LENGTH(a, 1, "Function \"length\" requires a single argument");
   ASSERT_NODE(a, a->cell[0]->type == NODE_Q_EXPRESSION,
     "Function \"length\" requires a Q-expression as its only argument");
@@ -234,7 +147,7 @@ Node* builtin_length(Node* a) {
   return new__IntegerNode(count);
 }
 
-Node* builtin_initial(Node* a) {
+Node* builtin_initial(Environment* e, Node* a) {
   ASSERT_NODE_LENGTH(a, 1, "Function \"length\" requires a single argument");
   ASSERT_NODE(a, a->cell[0]->type == NODE_Q_EXPRESSION,
     "Function \"length\" requires a Q-expression as its only argument");
@@ -247,26 +160,26 @@ Node* builtin_initial(Node* a) {
   return x;
 }
 
-Node* builtin(Node* a, char* symbol) {
-  if (strcmp("list", symbol) == 0) return builtin_list(a);
-  if (strcmp("head", symbol) == 0) return builtin_head(a);
-  if (strcmp("tail", symbol) == 0) return builtin_tail(a);
-  if (strcmp("join", symbol) == 0) return builtin_join(a);
-  if (strcmp("evaluate", symbol) == 0) return builtin_evaluate(a);
-  if (strcmp("construct", symbol) == 0) return builtin_construct(a);
-  if (strcmp("length", symbol) == 0) return builtin_length(a);
-  if (strcmp("initial", symbol) == 0) return builtin_initial(a);
-  if (strstr("+-/*%", symbol)) return builtin_op(a, symbol);
-  if (strcmp("add", symbol)      == 0 ||
-      strcmp("subtract", symbol) == 0 ||
-      strcmp("multiply", symbol) == 0 ||
-      strcmp("divide", symbol)   == 0 ||
-      strcmp("modulo", symbol)   == 0)
-    return builtin_op(a, symbol);
-  Node__free(a);
-
-  char* format = "Symbol %s is undefined";
-  char message[strlen(symbol)+strlen(format)-2];
-  sprintf(message, format, symbol);
-  return new__ErrorNode(message);
-}
+//Node* builtin(Node* a, char* symbol) {
+//  if (strcmp("list", symbol) == 0) return builtin_list(a);
+//  if (strcmp("head", symbol) == 0) return builtin_head(a);
+//  if (strcmp("tail", symbol) == 0) return builtin_tail(a);
+//  if (strcmp("join", symbol) == 0) return builtin_join(a);
+//  if (strcmp("evaluate", symbol) == 0) return builtin_evaluate(a);
+//  if (strcmp("construct", symbol) == 0) return builtin_construct(a);
+//  if (strcmp("length", symbol) == 0) return builtin_length(a);
+//  if (strcmp("initial", symbol) == 0) return builtin_initial(a);
+//  if (strstr("+-/*%", symbol)) return builtin_op(a, symbol);
+//  if (strcmp("add", symbol)      == 0 ||
+//      strcmp("subtract", symbol) == 0 ||
+//      strcmp("multiply", symbol) == 0 ||
+//      strcmp("divide", symbol)   == 0 ||
+//      strcmp("modulo", symbol)   == 0)
+//    return builtin_op(a, symbol);
+//  Node__free(a);
+//
+//  char* format = "Symbol %s is undefined";
+//  char message[strlen(symbol)+strlen(format)-2];
+//  sprintf(message, format, symbol);
+//  return new__ErrorNode(message);
+//}

@@ -1,5 +1,19 @@
 #ifndef NODE_TYPE_DEFINED
 #define NODE_TYPE_DEFINED
+#include "environment.h"
+
+#define ASSERT_NODE(ARGS, COND, ERR) \
+  if (!(COND)) { \
+    Node__free(ARGS); \
+    return new__ErrorNode(ERR); \
+  }
+
+#define ASSERT_NODE_LENGTH(ARGS, COUNT, ERR) \
+  if (ARGS->count != COUNT) { \
+    Node__free(ARGS); \
+    return new__ErrorNode(ERR); \
+  }
+
 /**
  * NODE_INTEGER
  * Indicates that the Node contains an integer
@@ -16,17 +30,19 @@ enum {
   NODE_Q_EXPRESSION,
   NODE_INTEGER,
   NODE_DECIMAL,
-  NODE_ERROR
+  NODE_ERROR,
+  NODE_FUNCTION
 };
 
 typedef struct NodeStruct {
-  int    type;
-  long   integer;
-  double decimal;
-  char*  error;
-  char*  symbol;
-  int    count;
-  struct NodeStruct** cell;
+  int     type;
+  long    integer;
+  double  decimal;
+  char*   error;
+  char*   symbol;
+  BuiltIn function;
+  int     count;
+  struct  NodeStruct** cell;
 } Node;
 
 /**
@@ -66,6 +82,10 @@ Node* new__SExpressionNode(void);
  */
 Node* new__QExpressionNode(void);
 
+/**
+ * new__FunctionNode(BuiltIn function)
+ */
+Node* new__FunctionNode(BuiltIn function);
 
 /**
  * Node__free
@@ -73,6 +93,12 @@ Node* new__QExpressionNode(void);
  * Node
  */
 void Node__free(Node*);
+
+/**
+ * Node* Node__copy(Node*);
+ * Creates a copy of the passed-in Node and returns it
+ */
+Node* Node__copy(Node*);
 
 /**
  * Node__print
@@ -123,4 +149,17 @@ double Node__to_double(Node*);
 /**
  */
 long Node__to_long(Node*);
+
+Node* Node__evaluate(Environment* e, Node*);
+Node* Node__evaluate_s_expression(Environment* e, Node*);
+Node* Node__pop(Node*, int);
+Node* Node__take(Node*, int);
+Node* Node__join(Node* x, Node* y);
+Node* Node__add(Node* v, Node* x);
+void NumberNode__negate_mutate(Node*);
+void NumberNode__add_mutate(Node*, Node*);
+void NumberNode__subtract_mutate(Node*, Node*);
+void NumberNode__multiply_mutate(Node*, Node*);
+void NumberNode__divide_mutate(Node*, Node*);
+
 #endif
