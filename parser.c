@@ -77,10 +77,3 @@ Node* FromAST__Node(mpc_ast_t* t) { // lval_read
 
   return x;
 }
-
-Node* Node__add(Node* v, Node* x) {
-  v->count++;
-  v->cell = realloc(v->cell, sizeof(Node*) * v->count);
-  v->cell[v->count-1] = x;
-  return v;
-}

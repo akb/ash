@@ -31,5 +31,4 @@ Node* FromDecimalAST__Node(mpc_ast_t* t);
 Node* FromSymbolAST__ResultVaule(mpc_ast_t* t);
 Node* FromSExpression__Node(mpc_ast_t* t);
 Node* FromAST__Node(mpc_ast_t* t);
-Node* Node__add(Node* v, Node* x);
 #endif

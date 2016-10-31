@@ -64,12 +64,48 @@ Node* new__QExpressionNode(void) {
   return v;
 }
 
+Node* new__FunctionNode(BuiltIn function) {
+  Node* v = malloc(sizeof(Node));
+  v->type = NODE_FUNCTION;
+  v->function = function;
+  return v;
+}
+
+Node* Node__copy(Node* v) {
+  Node* x = malloc(sizeof(Node));
+  x->type = v->type;
+
+  switch (v->type) {
+    case NODE_INTEGER:  x->integer = v->integer;   break;
+    case NODE_DECIMAL:  x->decimal = v->decimal;   break;
+    case NODE_FUNCTION: x->function = v->function; break;
+    case NODE_ERROR:
+      x->error = malloc(strlen(v->error) + 1);
+      strcpy(x->error, v->error);
+      break;
+    case NODE_SYMBOL:
+      x->symbol = malloc(strlen(v->symbol) + 1);
+      strcpy(x->symbol, v->symbol);
+      break;
+    case NODE_S_EXPRESSION:
+    case NODE_Q_EXPRESSION:
+      x->count = v->count;
+      x->cell = malloc(sizeof(Node*) * x->count);
+      for (int i = 0; i < x->count; i++) {
+        x->cell[i] = Node__copy(v->cell[i]);
+      }
+      break;
+  }
+  return x;
+}
+
 void Node__free(Node* v) {
   switch (v->type) {
-    case NODE_INTEGER: break;
-    case NODE_DECIMAL: break;
-    case NODE_ERROR:   free(v->error); break;
-    case NODE_SYMBOL:  free(v->symbol); break;
+    case NODE_INTEGER:                 break;
+    case NODE_DECIMAL:                 break;
+    case NODE_FUNCTION:                break;
+    case NODE_ERROR:  free(v->error);  break;
+    case NODE_SYMBOL: free(v->symbol); break;
     case NODE_Q_EXPRESSION:
     case NODE_S_EXPRESSION:
       for (int i = 0; i < v->count; i++)
@@ -82,37 +118,14 @@ void Node__free(Node* v) {
 
 void Node__print(Node* v) {
   switch (v->type) {
-    case NODE_INTEGER:
-      IntegerNode__print(v);
-      break;
-    case NODE_DECIMAL:
-      DecimalNode__print(v);
-      break;
-    case NODE_SYMBOL:
-      SymbolNode__print(v);
-      break;
-    case NODE_S_EXPRESSION:
-      ExpressionNode__print(v, '(', ')');
-      break;
-    case NODE_Q_EXPRESSION:
-      ExpressionNode__print(v, '{', '}');
-      break;
-    case NODE_ERROR:
-      ErrorNode__print(v);
-      break;
+    case NODE_INTEGER:      printf("%li", v->integer);          break;
+    case NODE_DECIMAL:      printf("%g", v->decimal);           break;
+    case NODE_SYMBOL:       printf("%s", v->symbol);            break;
+    case NODE_FUNCTION:     printf("<function>");               break;
+    case NODE_S_EXPRESSION: ExpressionNode__print(v, '(', ')'); break;
+    case NODE_Q_EXPRESSION: ExpressionNode__print(v, '{', '}'); break;
+    case NODE_ERROR:        ErrorNode__print(v);                break;
   }
-}
-
-void IntegerNode__print(Node* v) {
-  printf("%li", v->integer);
-}
-
-void DecimalNode__print(Node* v) {
-  printf("%g", v->decimal);
-}
-
-void SymbolNode__print(Node* v) {
-  printf("%s", v->symbol);
 }
 
 void ExpressionNode__print(Node* v, char open, char close) {
@@ -145,6 +158,123 @@ long Node__to_long(Node* v) {
   switch (v->type) {
     case NODE_INTEGER: return v->integer;
     case NODE_DECIMAL: return dtol(v->decimal);
-    default: return 0;
+    default:           return 0;
   }
+}
+
+Node* Node__evaluate(Environment* e, Node* v) {
+  if (v->type == NODE_SYMBOL) {
+    Node* x = Environment__get(e, v);
+    Node__free(v);
+    return x;
+  } else if (v->type == NODE_S_EXPRESSION) {
+    return Node__evaluate_s_expression(e, v);
+  } else {
+    return v;
+  }
+}
+
+Node* Node__evaluate_s_expression(Environment* e, Node* v) {
+  for (int i = 0; i < v->count; i++)
+    v->cell[i] = Node__evaluate(e, v->cell[i]);
+
+  for (int i = 0; i < v->count; i++)
+    if (v->cell[i]->type == NODE_ERROR)
+      return Node__take(v, i);
+
+  if (v->count == 0) return v;
+  if (v->count == 1) return Node__take(v, 0);
+
+  Node* f = Node__pop(v, 0);
+  if (f->type != NODE_FUNCTION) {
+    Node__free(f);
+    Node__free(v);
+    return new__ErrorNode("S-Expression does not begin with a function.");
+  }
+
+  Node* result = f->function(e, v);
+  Node__free(f);
+  return result;
+}
+
+Node* Node__pop(Node* v, int i) {
+  Node* x = v->cell[i];
+  memmove(&v->cell[i], &v->cell[i+1], sizeof(Node*) * (v->count-i-1));
+  v->count--;
+  v->cell = realloc(v->cell, sizeof(Node*) * v->count);
+  return x;
+}
+
+Node* Node__take(Node* v, int i) {
+  Node* x = Node__pop(v, i);
+  Node__free(v);
+  return x;
+}
+
+Node* Node__join(Node* x, Node* y) {
+  while (y->count) x = Node__add(x, Node__pop(y, 0));
+  Node__free(y);
+  return x;
+}
+
+void NumberNode__negate_mutate(Node* v) {
+  switch (v->type) {
+    case NODE_INTEGER:
+      v->integer = -v->integer;
+      return;
+    case NODE_DECIMAL:
+      v->decimal = -v->decimal;
+      return;
+  }
+}
+
+void NumberNode__add_mutate(Node* v, Node* x) {
+  switch (v->type) {
+    case NODE_INTEGER:
+      v->integer += x->integer;
+      return;
+    case NODE_DECIMAL:
+      v->decimal += x->decimal;
+      return;
+  }
+}
+
+void NumberNode__subtract_mutate(Node* v, Node* x) {
+  switch (v->type) {
+    case NODE_INTEGER:
+      v->integer -= x->integer;
+      return;
+    case NODE_DECIMAL:
+      v->decimal -= x->decimal;
+      return;
+  }
+}
+
+void NumberNode__multiply_mutate(Node* v, Node* x) {
+  switch (v->type) {
+    case NODE_INTEGER:
+      v->integer *= x->integer;
+      return;
+    case NODE_DECIMAL:
+      v->decimal *= x->decimal;
+      return;
+  }
+}
+
+void NumberNode__divide_mutate(Node* v, Node* x) {
+  switch (v->type) {
+    case NODE_INTEGER:
+      v->integer /= x->integer;
+      return;
+    case NODE_DECIMAL:
+      v->decimal /= x->decimal;
+      return;
+  }
+}
+
+Node* Node__add(Node* v, Node* x) {
+  v->count++;
+  v->cell = realloc(v->cell, sizeof(Node*) * v->count);
+  v->cell[v->count-1] = x;
+  return v;
 }

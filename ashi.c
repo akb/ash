@@ -11,14 +11,16 @@
 #endif
 
 #include "mpc.h"
-#include "parser.h"
+#include "environment.h"
 #include "node.h"
-#include "evaluate.h"
+#include "parser.h"
 
 void print_startup_message(void);
 
 int main(int argc, char** argv) {
   print_startup_message();
+  Environment* e = new__Environment();
+  Environment__add_builtins(e);
 
   while (1) {
     char* input = readline("ash: ");
@@ -28,8 +30,8 @@ int main(int argc, char** argv) {
 
     mpc_result_t r;
     if (mpc_parse("<stdin>", input, parser->ash, &r)) {
-      //mpc_ast_print(r.output);
-      Node* result = Node__evaluate(FromAST__Node(r.output));
+      //mpc_ast_print(r.output); // uncomment to display AST
+      Node* result = Node__evaluate(e, FromAST__Node(r.output));
       Node__println(result);
       Node__free(result);
       mpc_ast_delete(r.output);
@@ -42,6 +44,7 @@ int main(int argc, char** argv) {
     free(input);
   }
 
+  Environment__free(e);
   return 0;
 }
 
