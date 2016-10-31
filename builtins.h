@@ -14,3 +14,4 @@ Node* builtin_divide(Environment* e, Node* a);
 Node* builtin_multiply(Environment* e, Node* a);
 Node* builtin_subtract(Environment* e, Node* a);
 Node* builtin_add(Environment* e, Node* a);
+Node* builtin_define(Environment* e, Node* a);

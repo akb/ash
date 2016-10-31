@@ -160,26 +160,24 @@ Node* builtin_initial(Environment* e, Node* a) {
   return x;
 }
 
-//Node* builtin(Node* a, char* symbol) {
-//  if (strcmp("list", symbol) == 0) return builtin_list(a);
-//  if (strcmp("head", symbol) == 0) return builtin_head(a);
-//  if (strcmp("tail", symbol) == 0) return builtin_tail(a);
-//  if (strcmp("join", symbol) == 0) return builtin_join(a);
-//  if (strcmp("evaluate", symbol) == 0) return builtin_evaluate(a);
-//  if (strcmp("construct", symbol) == 0) return builtin_construct(a);
-//  if (strcmp("length", symbol) == 0) return builtin_length(a);
-//  if (strcmp("initial", symbol) == 0) return builtin_initial(a);
-//  if (strstr("+-/*%", symbol)) return builtin_op(a, symbol);
-//  if (strcmp("add", symbol)      == 0 ||
-//      strcmp("subtract", symbol) == 0 ||
-//      strcmp("multiply", symbol) == 0 ||
-//      strcmp("divide", symbol)   == 0 ||
-//      strcmp("modulo", symbol)   == 0)
-//    return builtin_op(a, symbol);
-//  Node__free(a);
-//
-//  char* format = "Symbol %s is undefined";
-//  char message[strlen(symbol)+strlen(format)-2];
-//  sprintf(message, format, symbol);
-//  return new__ErrorNode(message);
-//}
+Node* builtin_define(Environment* e, Node* a) {
+  ASSERT_NODE(a, a->cell[0]->type == NODE_Q_EXPRESSION,
+    "The first argument passed to 'define' must be a list of symbols");
+
+  Node* symbols = a->cell[0];
+
+  for (int i = 0; i < symbols->count - 1; i++) {
+    ASSERT_NODE(a, symbols->cell[i]->type == NODE_SYMBOL,
+      "cannot define a non-symbol as an argument");
+  }
+
+  ASSERT_NODE(a, symbols->count == a->count - 1,
+    "incorrect number of arguments");
+
+  for (int i = 0; i < symbols->count; i++) {
+    Environment__put(e, symbols->cell[i], a->cell[i + 1]);
+  }
+
+  Node__free(a);
+  return new__SExpressionNode();
+}
