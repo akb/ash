@@ -65,7 +65,7 @@ Node* new__SymbolNode(char* symbol) {
   Node* v = malloc(sizeof(Node));
   v->type = NODE_SYMBOL;
   v->symbol = malloc(strlen(symbol) + 1);
-  strcpy(v->symbol, symbol); // TODO: null terminator?
+  strcpy(v->symbol, symbol);
   return v;
 }
 
@@ -85,10 +85,15 @@ Node* new__QExpressionNode(void) {
   return v;
 }
 
-Node* new__FunctionNode(BuiltIn function) {
+Node* new__FunctionNode(BuiltIn function, char* name) {
   Node* v = malloc(sizeof(Node));
   v->type = NODE_FUNCTION;
   v->function = function;
+  if (name == NULL) {
+    name = "(anonymous)";
+  }
+  v->symbol = malloc(strlen(name) + 1);
+  strcpy(v->symbol, name);
   return v;
 }
 
@@ -99,11 +104,12 @@ Node* Node__copy(Node* v) {
   switch (v->type) {
     case NODE_INTEGER:  x->integer = v->integer;   break;
     case NODE_DECIMAL:  x->decimal = v->decimal;   break;
-    case NODE_FUNCTION: x->function = v->function; break;
     case NODE_ERROR:
       x->error = malloc(strlen(v->error) + 1);
       strcpy(x->error, v->error);
       break;
+    case NODE_FUNCTION:
+      x->function = v->function;
     case NODE_SYMBOL:
       x->symbol = malloc(strlen(v->symbol) + 1);
       strcpy(x->symbol, v->symbol);
@@ -124,9 +130,9 @@ void Node__free(Node* v) {
   switch (v->type) {
     case NODE_INTEGER:                 break;
     case NODE_DECIMAL:                 break;
-    case NODE_FUNCTION:                break;
-    case NODE_ERROR:  free(v->error);  break;
+    case NODE_FUNCTION:
     case NODE_SYMBOL: free(v->symbol); break;
+    case NODE_ERROR:  free(v->error);  break;
     case NODE_Q_EXPRESSION:
     case NODE_S_EXPRESSION:
       for (int i = 0; i < v->count; i++)
@@ -142,10 +148,10 @@ void Node__print(Node* v) {
     case NODE_INTEGER:      printf("%li", v->integer);          break;
     case NODE_DECIMAL:      printf("%g", v->decimal);           break;
     case NODE_SYMBOL:       printf("%s", v->symbol);            break;
-    case NODE_FUNCTION:     printf("<function>");               break;
     case NODE_S_EXPRESSION: ExpressionNode__print(v, '(', ')'); break;
     case NODE_Q_EXPRESSION: ExpressionNode__print(v, '{', '}'); break;
     case NODE_ERROR:        ErrorNode__print(v);                break;
+    case NODE_FUNCTION:     printf("<function:%s>", v->symbol); break;
   }
 }
 

@@ -36,10 +36,11 @@ Node* Environment__get(Environment* e, Node* k) {
 
 void Environment__put(Environment* e, Node* k, Node* v) {
   for (int i = 0; i < e->count; i++) {
-    if (strcmp(e->symbols[i], k->symbol) != 0) continue;
-    Node__free(e->nodes[i]);
-    e->nodes[i] = Node__copy(v);
-    return;
+    if (strcmp(e->symbols[i], k->symbol) == 0) {
+      Node__free(e->nodes[i]);
+      e->nodes[i] = Node__copy(v);
+      return;
+    }
   }
 
   e->count++;
@@ -54,7 +55,9 @@ void Environment__put(Environment* e, Node* k, Node* v) {
 
 void Environment__add_builtin(Environment* e, char* name, BuiltIn function) {
   Node* k = new__SymbolNode(name);
-  Node* v = new__FunctionNode(function);
+  char display_name[strlen(name) + 3];
+  sprintf(display_name, "(%s)", name);
+  Node* v = new__FunctionNode(function, display_name);
   Environment__put(e, k, v);
   Node__free(k);
   Node__free(v);

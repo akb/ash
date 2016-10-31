@@ -100,7 +100,7 @@ Node* new__QExpressionNode(void);
 /**
  * new__FunctionNode(BuiltIn function)
  */
-Node* new__FunctionNode(BuiltIn function);
+Node* new__FunctionNode(BuiltIn, char*);
 
 /**
  * Node__free
