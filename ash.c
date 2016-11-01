@@ -24,6 +24,8 @@ int main(int argc, char** argv) {
 
   while (1) {
     char* input = readline("ash: ");
+    if (input == NULL) break;
+
     add_history(input);
 
     AshParser* parser = new__AshParser();
@@ -49,6 +51,6 @@ int main(int argc, char** argv) {
 }
 
 void print_startup_message() {
-  puts("ashi: interactive ash v0.0.1");
-  puts("Press Ctrl+C to exit.\n");
+  //puts("interactive ash v0.0.1");
+  //puts("Press Ctrl+C to exit.\n");
 }
