@@ -129,8 +129,8 @@ Node* builtin_construct(Environment* e, Node* a) {
 }
 
 Node* builtin_length(Environment* e, Node* a) {
-  ASSERT_ARGUMENT_COUNT("construct", a, 1);
-  ASSERT_ARGUMENT_TYPE("construct", a, 0, NODE_Q_EXPRESSION);
+  ASSERT_ARGUMENT_COUNT("length", a, 1);
+  ASSERT_ARGUMENT_TYPE("length", a, 0, NODE_Q_EXPRESSION);
 
   long count = a->cell[0]->count;
   Node__free(a);
