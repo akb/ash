@@ -3,15 +3,16 @@
 (define interpreter
   (filepath:join-path (append (list (current-directory)) '("bin" "ash"))))
 
+(define (check-condition conditions)
+  (begin
+    (if (car conditions)
+      (display ".")
+      (display "x"))
+    (if (> (length conditions) 1)
+      (check-condition (cdr conditions)))))
+
 (define (it behavior . conditions)
   (format #t "- it ~A" behavior)
-  (define (check-condition conditions)
-    (begin
-      (if (car conditions)
-        (display ".")
-        (display "x"))
-      (if (> (length conditions) 1)
-        (check-condition (cdr conditions))))) ; tail call
   (check-condition conditions)
   (newline))
 
