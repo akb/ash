@@ -27,6 +27,8 @@ Node* builtin_op(Environment* e, Node* a, char* op) {
       NumberNode__subtract_mutate(x, y);
     if (strcmp(op, "*") == 0 || strcmp(op, "multiply") == 0)
       NumberNode__multiply_mutate(x, y);
+    if (strcmp(op, "%") == 0 || strcmp(op, "modulo") == 0)
+      NumberNode__modulo_mutate(x, y);
     if (strcmp(op, "/") == 0 || strcmp(op, "divide") == 0) {
       if ((y->type == NODE_INTEGER && y->integer == 0) ||
           (y->type == NODE_DECIMAL && y->decimal == 0.0)) {

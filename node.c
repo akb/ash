@@ -4,6 +4,7 @@
 #include <assert.h>
 #include <limits.h>
 #include <string.h>
+#include <math.h>
 
 #include "node.h"
 
@@ -295,6 +296,17 @@ void NumberNode__divide_mutate(Node* v, Node* x) {
       return;
     case NODE_DECIMAL:
       v->decimal /= x->decimal;
+      return;
+  }
+}
+
+void NumberNode__modulo_mutate(Node* v, Node* x) {
+  switch (v->type) {
+    case NODE_INTEGER:
+      v->integer %= x->integer;
+      return;
+    case NODE_DECIMAL:
+      v->decimal = fmod(v->decimal, x->decimal);
       return;
   }
 }
