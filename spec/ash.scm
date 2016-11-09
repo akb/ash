@@ -1,74 +1,83 @@
-(use irregex shell filepath posix)
-
-(define interpreter
-  (filepath:join-path (append (list (current-directory)) '("bin" "ash"))))
-
-(define (check-condition conditions)
-  (begin
-    (if (car conditions)
-      (display ".")
-      (display "x"))
-    (if (> (length conditions) 1)
-      (check-condition (cdr conditions)))))
-
-(define (it behavior . conditions)
-  (format #t "- it ~A" behavior)
-  (check-condition conditions)
-  (newline))
-
-(define (ash-eval code)
-  (let ((stdout (capture ,(format #f "echo \"~A\" | ~A" code interpreter))))
-    (if (= (string-length stdout) 0)
-      (begin
-        (format #t "Failed to execute \n~A\n" command)
-        (exit))
-      stdout)))
+(include "spec/spec-cli")
 
 (display "Basic mathematical operations.\n")
 
-(define (test-case code output)
-  (irregex-search (irregex-quote output) (ash-eval code)))
-
 (it "can add numbers"
-  (test-case "(+ 1 1)"      "2")
-  (test-case "(+ 1 1 1)"    "3")
-  (test-case "(add 5 8 10)" "23"))
+  '("(+ 1 1)"      "2")
+  '("(+ 1 1 1)"    "3")
+  '("(add 5 8 10)" "23"))
 
 (it "can multiply numbers"
-  (test-case "(* 2 2)"          "4")
-  (test-case "(* 2 2 2)"        "8")
-  (test-case "(multiply 4 4 4)" "64"))
+  '("(* 2 2)"          "4")
+  '("(* 2 2 2)"        "8")
+  '("(multiply 4 4 4)" "64"))
 
 (it "can subtract numbers"
-  (test-case "(- 16 8)"           "8")
-  (test-case "(- 16 8 4)"         "4")
-  (test-case "(subtract 32 16 8)" "8"))
+  '("(- 16 8)"           "8")
+  '("(- 16 8 4)"         "4")
+  '("(subtract 32 16 8)" "8"))
+
 
 (it "can divide 16 in 4"
-  (test-case "(/ 16 4)"      "4")
-  (test-case "(divide 32 4)" "8"))
+  '("(/ 16 4)"      "4")
+  '("(divide 32 4)" "8"))
+
+(it "can find the remainder"
+  '("(% 16 5)"      "1")
+  '("(modulo 32 3)" "2"))
 
 (it "can nest expressions"
-  (test-case "(+ 2 5 6 (- 3 4 (* 23 53)) (* 934 34))" "30549"))
+  '("(+ 2 5 6 (- 3 4 (* 23 53)) (* 934 34))" "30549"))
 
+(it "can operate on floating-point numbers"
+  '("(+ 2.2 3.3)"        "5.5")
+  '("(add 2.2 3.3 1.1)"  "6.6")
+  '("(- 5.5 1.1)"        "4.4")
+  '("(subtract 9.9 2.2)" "7.7")
+  '("(* 2.2 2.2)"        "4.84")
+  '("(multiply 3.3 4.2)" "13.86")
+  '("(/ 4.4 1.1)"        "4")
+  '("(divide 4.5 5.0)"   "0.9")
+  '("(/ 4.5 5.0 3.0)"    "0.3")
+  '("(% 10.5 5.0)"       "0.5")
+  '("(modulo 10.5 5.0)"  "0.5"))
 
+(it "can mix integer and floating-point numbers"
+  '("(+ 2.2 3)"        "5.2")
+  '("(add 2 3 1.1)"    "6.1")
+  '("(- 5.5 1)"        "4.5")
+  '("(subtract 9.9 2)" "7")
+  '("(* 2.2 2)"        "4.4")
+  '("(multiply 3.3 4)" "13.2")
+  '("(/ 4.4 2)"        "2.2")
+  '("(divide 4.5 5)"   "0.9")
+  '("(/ 4.5 5 3)"      "0.3")
+  '("(% 10.5 5)"       "0.5")
+  '("(modulo 10.5 5)"  "0.5"))
 (newline)
+
 (display "List operations.\n")
 
 (it "can define q-expressions"
-  (test-case "{1 2 3 4}"          "{1 2 3 4}")
-  (test-case "(list 1 2 3 4 5)"   "{1 2 3 4 5}")
-  (test-case "{abc def ghi}"      "{abc def ghi}"))
+  '("{1 2 3 4}"          "{1 2 3 4}")
+  '("(list 1 2 3 4 5)"   "{1 2 3 4 5}")
+  '("(list (+ 1 2) 6 9)" "{3 6 9}")
+  '("{abc def ghi}"      "{abc def ghi}"))
 
 (it "can return the first element of a q-expression with 'head'"
-  (test-case "(head {1 2 3})"   "{1}")
-  (test-case "(head {abc def})" "{abc}")
-  (test-case "(head {1})"       "{1}"))
+  '("(head {1 2 3})"   "{1}")
+  '("(head {abc def})" "{abc}")
+  '("(head {1})"       "{1}"))
 
 (it "can return all the elements except the first with 'tail'"
-  (test-case "(tail {1 2 3 4})"      "{2 3 4}")
-  (test-case "(tail {ab cd ef gh})"  "{cd ef gh}")
-  (test-case "(tail (list 1 3 5 8))" "{3 5 8}"))
+  '("(tail {1 2 3 4})"      "{2 3 4}")
+  '("(tail {ab cd ef gh})"  "{cd ef gh}")
+  '("(tail (list 1 3 5 8))" "{3 5 8}"))
 
 (it "can prepend an item to a list with 'construct'"
-  (test-case "(construct 1 {2 3 4})" "{1 2 3 4}"))
+  '("(construct 1 {2 3 4})" "{1 2 3 4}"))
+
+(it "can get the length of a list with 'length'"
+  '("(length {1 2 3 4})" "4")
+  '("(length {1})"       "1")
+  '("(length {})"        "0"))
