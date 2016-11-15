@@ -91,7 +91,7 @@
   '("(initial {1})"       "{}"))
 (newline)
 
-(display "complex operations")
+(display "complex operations\n")
 
 (it "can define constants"
   '("(define {x} 1) x" "1"))
