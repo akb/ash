@@ -23,7 +23,7 @@
     (if (irregex-match expected actual) #t (list (car condition) expected actual))))
 
 (define (ash-eval code)
-  (let ((stdout (capture ,(format #f "echo \"~A\" | ~A" code interpreter))))
+  (let ((stdout (capture ,(format #f "echo \"~A\" | ~A -s" code interpreter))))
     (if (= (string-length stdout) 0)
       (fatal "Failed to execute \n~A\n" command)
       stdout)))

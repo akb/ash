@@ -1,5 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <getopt.h>
+#include <stdbool.h>
 
 #ifdef _WIN32
 #include "editline.h"
@@ -15,10 +17,22 @@
 #include "node.h"
 #include "parser.h"
 
+static bool silent_flag = false;
+
 void print_startup_message(void);
+int parse_arguments(int, char**);
 
 int main(int argc, char** argv) {
-  print_startup_message();
+  int status = parse_arguments(argc, argv);
+  if (status != 0) {
+    fputs("Error occurred while parsing arguments.\n", stderr);
+    return 1;
+  }
+
+  if (silent_flag == false) {
+    print_startup_message();
+  }
+
   Environment* e = new__Environment();
   Environment__add_builtins(e);
 
@@ -47,6 +61,19 @@ int main(int argc, char** argv) {
   }
 
   Environment__free(e);
+  return 0;
+}
+
+int parse_arguments(int argc, char** argv) {
+  int opt;
+  while ((opt = getopt(argc, argv, "s")) != -1) {
+    switch (opt) {
+      case 's': silent_flag = true; break;
+      default:
+        fprintf(stderr, "Received unknown argument '-%d'.\n", opt);
+        return 1;
+    }
+  }
   return 0;
 }
 
