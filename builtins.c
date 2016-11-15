@@ -174,7 +174,7 @@ Node* builtin_define(Environment* e, Node* a) {
     "incorrect number of arguments");
 
   for (int i = 0; i < symbols->count; i++) {
-    Environment__put(e, symbols->cell[i], a->cell[i + 1]);
+    environment_put(e, symbols->cell[i], a->cell[i + 1]);
   }
 
   Node__free(a);

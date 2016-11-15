@@ -192,7 +192,7 @@ long Node__to_long(Node* v) {
 
 Node* Node__evaluate(Environment* e, Node* v) {
   if (v->type == NODE_SYMBOL) {
-    Node* x = Environment__get(e, v);
+    Node* x = environment_get(e, v);
     Node__free(v);
     return x;
   } else if (v->type == NODE_S_EXPRESSION) {

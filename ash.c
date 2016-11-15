@@ -17,19 +17,19 @@
 #include "node.h"
 #include "parser.h"
 
-static bool silent_flag = false;
+static bool flag_silent = false;
 
-void print_startup_message(void);
-void parse_arguments(int, char**);
+void ash_print_startup_message(void);
+void ash_parse_arguments(int, char**);
 
 int main(int argc, char** argv) {
-  parse_arguments(argc, argv);
-  if (silent_flag == false) {
-    print_startup_message();
+  ash_parse_arguments(argc, argv);
+  if (flag_silent == false) {
+    ash_print_startup_message();
   }
 
-  Environment* e = new__Environment();
-  Environment__add_builtins(e);
+  Environment* e = new_environment();
+  environment_add_builtins(e);
 
   while (1) {
     char* input = readline("ash: ");
@@ -55,15 +55,15 @@ int main(int argc, char** argv) {
     free(input);
   }
 
-  Environment__free(e);
+  environment_delete(e);
   return 0;
 }
 
-void parse_arguments(int argc, char** argv) {
+void ash_parse_arguments(int argc, char** argv) {
   int opt;
   while ((opt = getopt(argc, argv, "s")) != -1) {
     switch (opt) {
-      case 's': silent_flag = true; break;
+      case 's': flag_silent = true; break;
       default: goto parse_arguments_done;
     }
   }
@@ -71,7 +71,7 @@ parse_arguments_done:
   return;
 }
 
-void print_startup_message() {
+void ash_print_startup_message() {
   puts("ash: application shell v0.0.1");
   puts("Press Ctrl+C to exit.\n");
 }
