@@ -21,12 +21,24 @@ Node* builtin_op(Environment* e, Node* a, char* op) {
 
   while (a->count > 0) {
     Node* y = Node__pop(a, 0);
+    if ((x->type == NODE_DECIMAL) != (y->type == NODE_DECIMAL)) {
+      if (x->type == NODE_INTEGER) {
+        x->type = NODE_DECIMAL;
+        x->decimal = (double)x->integer;
+      }
+      if (y->type == NODE_INTEGER) {
+        y->type = NODE_DECIMAL;
+        y->decimal = (double)y->integer;
+      }
+    }
     if (strcmp(op, "+") == 0 || strcmp(op, "add") == 0)
       NumberNode__add_mutate(x, y);
     if (strcmp(op, "-") == 0 || strcmp(op, "subtract") == 0)
       NumberNode__subtract_mutate(x, y);
     if (strcmp(op, "*") == 0 || strcmp(op, "multiply") == 0)
       NumberNode__multiply_mutate(x, y);
+    if (strcmp(op, "%") == 0 || strcmp(op, "modulo") == 0)
+      NumberNode__modulo_mutate(x, y);
     if (strcmp(op, "/") == 0 || strcmp(op, "divide") == 0) {
       if ((y->type == NODE_INTEGER && y->integer == 0) ||
           (y->type == NODE_DECIMAL && y->decimal == 0.0)) {
@@ -129,8 +141,8 @@ Node* builtin_construct(Environment* e, Node* a) {
 }
 
 Node* builtin_length(Environment* e, Node* a) {
-  ASSERT_ARGUMENT_COUNT("construct", a, 1);
-  ASSERT_ARGUMENT_TYPE("construct", a, 0, NODE_Q_EXPRESSION);
+  ASSERT_ARGUMENT_COUNT("length", a, 1);
+  ASSERT_ARGUMENT_TYPE("length", a, 0, NODE_Q_EXPRESSION);
 
   long count = a->cell[0]->count;
   Node__free(a);

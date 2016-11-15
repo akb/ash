@@ -12,6 +12,7 @@ Features from book:
 
 Added features:
 - Modular codebase
+- Functional test suite (written in [Chicken Scheme](https://www.call-cc.org/))
 - Modulus operator (%) for both integers and floating-point
 - Textual operator aliases (add, subtract, multiply, divide, modulo)
 - Double-precision floating-point numbers

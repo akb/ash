@@ -176,5 +176,6 @@ void NumberNode__add_mutate(Node*, Node*);
 void NumberNode__subtract_mutate(Node*, Node*);
 void NumberNode__multiply_mutate(Node*, Node*);
 void NumberNode__divide_mutate(Node*, Node*);
+void NumberNode__modulo_mutate(Node*, Node*);
 
 #endif

@@ -71,7 +71,7 @@ Node* FromAST__Node(mpc_ast_t* t) { // lval_read
     if (strcmp(t->children[i]->contents, ")") == 0) continue;
     if (strcmp(t->children[i]->contents, "{") == 0) continue;
     if (strcmp(t->children[i]->contents, "}") == 0) continue;
-    if (strcmp(t->children[i]->tag, "regex") == 0) continue;
+    if (strcmp(t->children[i]->tag,  "regex") == 0) continue;
     x = Node__add(x, FromAST__Node(t->children[i]));
   }
 
