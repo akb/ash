@@ -1,6 +1,7 @@
 ## Ash
 
-Ash is a toy language made for the book "Build your own LISP" by Daniel Holden.
+Ash is a toy programming language written while reading the book
+"Build your own LISP" by Daniel Holden.
 
 Features from book:
 - REPL

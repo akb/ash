@@ -3,95 +3,98 @@
 (display "Basic mathematical operations.\n")
 
 (it "can add numbers"
-  '("(+ 1 1)"      "2")
-  '("(+ 1 1 1)"    "3")
-  '("(add 5 8 10)" "23"))
+  '("2" "(+ 1 1)")
+  '("3" "(+ 1 1 1)")
+  '("23" "(add 5 8 10)"))
 
 (it "can multiply numbers"
-  '("(* 2 2)"          "4")
-  '("(* 2 2 2)"        "8")
-  '("(multiply 4 4 4)" "64"))
+  '("4"  "(* 2 2)")
+  '("8"  "(* 2 2 2)")
+  '("64" "(multiply 4 4 4)"))
 
 (it "can subtract numbers"
-  '("(- 16 8)"           "8")
-  '("(- 16 8 4)"         "4")
-  '("(subtract 32 16 8)" "8"))
-
+  '("8" "(- 16 8)")
+  '("4" "(- 16 8 4)")
+  '("8" "(subtract 32 16 8)"))
 
 (it "can divide 16 in 4"
-  '("(/ 16 4)"      "4")
-  '("(divide 32 4)" "8"))
+  '("4" "(/ 16 4)")
+  '("8" "(divide 32 4)"))
 
 (it "can find the remainder"
-  '("(% 16 5)"      "1")
-  '("(modulo 32 3)" "2"))
+  '("1" "(% 16 5)")
+  '("2" "(modulo 32 3)"))
 
 (it "can nest expressions"
-  '("(+ 2 5 6 (- 3 4 (* 23 53)) (* 934 34))" "30549"))
+  '("30549" "(+ 2 5 6 (- 3 4 (* 23 53)) (* 934 34))"))
 
 (it "can operate on floating-point numbers"
-  '("(+ 2.2 3.3)"        "5.5")
-  '("(add 2.2 3.3 1.1)"  "6.6")
-  '("(- 5.5 1.1)"        "4.4")
-  '("(subtract 9.9 2.2)" "7.7")
-  '("(* 2.2 2.2)"        "4.84")
-  '("(multiply 3.3 4.2)" "13.86")
-  '("(/ 4.4 1.1)"        "4")
-  '("(divide 4.5 5.0)"   "0.9")
-  '("(/ 4.5 5.0 3.0)"    "0.3")
-  '("(% 10.5 5.0)"       "0.5")
-  '("(modulo 10.5 5.0)"  "0.5"))
+  '("5.5"   "(+ 2.2 3.3)")
+  '("6.6"   "(add 2.2 3.3 1.1)")
+  '("4.4"   "(- 5.5 1.1)")
+  '("7.7"   "(subtract 9.9 2.2)")
+  '("4.84"  "(* 2.2 2.2)")
+  '("13.86" "(multiply 3.3 4.2)")
+  '("4"     "(/ 4.4 1.1)")
+  '("0.9"   "(divide 4.5 5.0)")
+  '("0.3"   "(/ 4.5 5.0 3.0)")
+  '("0.5"   "(% 10.5 5.0)")
+  '("0.5"   "(modulo 10.5 5.0)"))
 
 (it "can mix integer and floating-point numbers"
-  '("(+ 2.2 3)"        "5.2")
-  '("(add 2 3 1.1)"    "6.1")
-  '("(- 5.5 1)"        "4.5")
-  '("(subtract 9.9 2)" "7.9")
-  '("(* 2.2 2)"        "4.4")
-  '("(multiply 3.3 4)" "13.2")
-  '("(/ 4.4 2)"        "2.2")
-  '("(divide 4.5 5)"   "0.9")
-  '("(/ 4.5 5 3)"      "0.3")
-  '("(% 10.5 5)"       "0.5")
-  '("(modulo 10.5 5)"  "0.5"))
+  '("5.2"  "(+ 2.2 3)")
+  '("6.1"  "(add 2 3 1.1)")
+  '("4.5"  "(- 5.5 1)")
+  '("7.9"  "(subtract 9.9 2)")
+  '("4.4"  "(* 2.2 2)")
+  '("13.2" "(multiply 3.3 4)")
+  '("2.2"  "(/ 4.4 2)")
+  '("0.9"  "(divide 4.5 5)")
+  '("0.3"  "(/ 4.5 5 3)")
+  '("0.5"  "(% 10.5 5)")
+  '("0.5"  "(modulo 10.5 5)"))
 (newline)
 
 (display "List operations.\n")
 
 (it "can define q-expressions"
-  '("{1 2 3 4}"          "{1 2 3 4}")
-  '("(list 1 2 3 4 5)"   "{1 2 3 4 5}")
-  '("(list (+ 1 2) 6 9)" "{3 6 9}")
-  '("{abc def ghi}"      "{abc def ghi}"))
+  '("{1 2 3 4}"     "{1 2 3 4}")
+  '("{1 2 3 4 5}"   "(list 1 2 3 4 5)")
+  '("{3 6 9}"       "(list (+ 1 2) 6 9)")
+  '("{abc def ghi}" "{abc def ghi}"))
 
 (it "can return the first element of a q-expression with 'head'"
-  '("(head {1 2 3})"   "{1}")
-  '("(head {abc def})" "{abc}")
-  '("(head {1})"       "{1}"))
+  '("{1}"   "(head {1 2 3})")
+  '("{abc}" "(head {abc def})")
+  '("{1}"   "(head {1})"))
 
 (it "can return all the elements except the first with 'tail'"
-  '("(tail {1 2 3 4})"      "{2 3 4}")
-  '("(tail {ab cd ef gh})"  "{cd ef gh}")
-  '("(tail (list 1 3 5 8))" "{3 5 8}"))
+  '("{2 3 4}"    "(tail {1 2 3 4})")
+  '("{cd ef gh}" "(tail {ab cd ef gh})")
+  '("{3 5 8}"    "(tail (list 1 3 5 8))"))
 
 (it "can prepend an item to a list with 'construct'"
-  '("(construct 1 {2 3 4})" "{1 2 3 4}"))
+  '("{1 2 3 4}" "(construct 1 {2 3 4})"))
 
 (it "can get the length of a list with 'length'"
-  '("(length {1 2 3 4})" "4")
-  '("(length {1})"       "1")
-  '("(length {})"        "0"))
+  '("4" "(length {1 2 3 4})")
+  '("1" "(length {1})")
+  '("0" "(length {})"))
 
 (it "can join lists together with 'join'"
-  '("(join {1 2 3} {4 5 6})"   "{1 2 3 4 5 6}")
-  '("(join {1 2} {3 4} {5 6})" "{1 2 3 4 5 6}"))
+  '("{1 2 3 4 5 6}" "(join {1 2 3} {4 5 6})")
+  '("{1 2 3 4 5 6}" "(join {1 2} {3 4} {5 6})"))
 
 (it "can remove the last item of a list with 'initial'"
-  '("(initial {1 2 3 4})" "{1 2 3}")
-  '("(initial {1})"       "{}"))
+  '("{1 2 3}" "(initial {1 2 3 4})")
+  '("{}"      "(initial {1})"))
 (newline)
 
 (display "complex operations\n")
 
 (it "can define constants"
-  '("(define {x} 1) x" "1"))
+  '("1" "(define {x} 1)" "x"))
+
+(it "can evaluate a list"
+  '("10" "(evaluate {add 1 2 3 4})")
+  '("30" "(evaluate (join {add} (list 10 10 10)))"))
