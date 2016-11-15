@@ -51,6 +51,6 @@ int main(int argc, char** argv) {
 }
 
 void print_startup_message() {
-  //puts("interactive ash v0.0.1");
-  //puts("Press Ctrl+C to exit.\n");
+  puts("ash: application shell v0.0.1");
+  puts("Press Ctrl+C to exit.\n");
 }
