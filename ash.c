@@ -20,15 +20,10 @@
 static bool silent_flag = false;
 
 void print_startup_message(void);
-int parse_arguments(int, char**);
+void parse_arguments(int, char**);
 
 int main(int argc, char** argv) {
-  int status = parse_arguments(argc, argv);
-  if (status != 0) {
-    fputs("Error occurred while parsing arguments.\n", stderr);
-    return 1;
-  }
-
+  parse_arguments(argc, argv);
   if (silent_flag == false) {
     print_startup_message();
   }
@@ -64,17 +59,16 @@ int main(int argc, char** argv) {
   return 0;
 }
 
-int parse_arguments(int argc, char** argv) {
+void parse_arguments(int argc, char** argv) {
   int opt;
   while ((opt = getopt(argc, argv, "s")) != -1) {
     switch (opt) {
       case 's': silent_flag = true; break;
-      default:
-        fprintf(stderr, "Received unknown argument '-%d'.\n", opt);
-        return 1;
+      default: goto parse_arguments_done;
     }
   }
-  return 0;
+parse_arguments_done:
+  return;
 }
 
 void print_startup_message() {
