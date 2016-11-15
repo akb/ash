@@ -1,4 +1,4 @@
-.PHONY: clean
+.PHONY: clean test
 
 BINARY=./bin/ash
 CC=cc
@@ -13,3 +13,6 @@ $(BINARY):
 
 clean:
 	rm -rf bin/ash
+
+test:
+	csi -s spec/ash.scm

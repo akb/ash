@@ -46,7 +46,7 @@
   '("(+ 2.2 3)"        "5.2")
   '("(add 2 3 1.1)"    "6.1")
   '("(- 5.5 1)"        "4.5")
-  '("(subtract 9.9 2)" "7")
+  '("(subtract 9.9 2)" "7.9")
   '("(* 2.2 2)"        "4.4")
   '("(multiply 3.3 4)" "13.2")
   '("(/ 4.4 2)"        "2.2")
@@ -81,3 +81,17 @@
   '("(length {1 2 3 4})" "4")
   '("(length {1})"       "1")
   '("(length {})"        "0"))
+
+(it "can join lists together with 'join'"
+  '("(join {1 2 3} {4 5 6})"   "{1 2 3 4 5 6}")
+  '("(join {1 2} {3 4} {5 6})" "{1 2 3 4 5 6}"))
+
+(it "can remove the last item of a list with 'initial'"
+  '("(initial {1 2 3 4})" "{1 2 3}")
+  '("(initial {1})"       "{}"))
+(newline)
+
+(display "complex operations")
+
+(it "can define constants"
+  '("(define {x} 1) x" "1"))

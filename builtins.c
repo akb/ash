@@ -21,6 +21,16 @@ Node* builtin_op(Environment* e, Node* a, char* op) {
 
   while (a->count > 0) {
     Node* y = Node__pop(a, 0);
+    if ((x->type == NODE_DECIMAL) != (y->type == NODE_DECIMAL)) {
+      if (x->type == NODE_INTEGER) {
+        x->type = NODE_DECIMAL;
+        x->decimal = (double)x->integer;
+      }
+      if (y->type == NODE_INTEGER) {
+        y->type = NODE_DECIMAL;
+        y->decimal = (double)y->integer;
+      }
+    }
     if (strcmp(op, "+") == 0 || strcmp(op, "add") == 0)
       NumberNode__add_mutate(x, y);
     if (strcmp(op, "-") == 0 || strcmp(op, "subtract") == 0)
