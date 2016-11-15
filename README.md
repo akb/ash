@@ -21,6 +21,8 @@ Added features:
 - "construct" (cons) builtin
 - "length" (len) builtin
 - "initial" builtin
+- Command-line argument parsing
+- "-s" command-line flag for disabling informational output
 
 Problems that prevent this from being practical:
 - No Unicode support
