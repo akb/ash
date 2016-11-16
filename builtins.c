@@ -4,6 +4,7 @@
 
 #include "environment.h"
 #include "node.h"
+#include "builtins.h"
 
 void node_number_negate_mutate(Node*);
 void node_number_add_mutate(Node*, Node*);

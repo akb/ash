@@ -106,8 +106,8 @@ Node* node_copy(Node* v) {
   x->type = v->type;
 
   switch (v->type) {
-    case NODE_INTEGER:  x->integer = v->integer;   break;
-    case NODE_DECIMAL:  x->decimal = v->decimal;   break;
+    case NODE_INTEGER: x->integer = v->integer; break;
+    case NODE_DECIMAL: x->decimal = v->decimal; break;
     case NODE_ERROR:
       x->error = malloc(strlen(v->error) + 1);
       strcpy(x->error, v->error);

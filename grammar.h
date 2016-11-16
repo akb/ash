@@ -8,5 +8,5 @@ static char* ASH_GRAMMAR =
   "s_expression : '(' <expression>* ')' ;"
   "q_expression : '{' <expression>* '}' ;"
   "expression : <number> | <symbol> | <s_expression> | <q_expression> ;"
-  "ash        : /^/ <expression>* /$/ ;";
+  "ash : /^/ <expression>* /$/ ;";
 #endif
