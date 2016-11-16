@@ -10,6 +10,8 @@
 #include "node.h"
 #include "builtins.h"
 
+Node* builtin_var(Environment* e, Node* a, char* name);
+
 void node_number_negate_mutate(Node*);
 void node_number_add_mutate(Node*, Node*);
 void node_number_subtract_mutate(Node*, Node*);
@@ -171,19 +173,31 @@ Node* builtin_initial(Environment* e, Node* a) {
 }
 
 Node* builtin_define(Environment* e, Node* a) {
-  ASSERT_ARGUMENT_TYPE("define", a, 0, NODE_Q_EXPRESSION);
+  return builtin_var(e, a, "define");
+}
+
+Node* builtin_global(Environment* e, Node* a) {
+  return builtin_var(e, a, "global");
+}
+
+Node* builtin_var(Environment* e, Node* a, char* name) {
+  ASSERT_ARGUMENT_TYPE(name, a, 0, NODE_Q_EXPRESSION);
 
   Node* symbols = a->cell[0];
 
   for (int i = 0; i < symbols->count - 1; i++) {
-    ASSERT_ARGUMENT_TYPE("define", symbols, i, NODE_SYMBOL);
+    ASSERT_ARGUMENT_TYPE(name, symbols, i, NODE_SYMBOL);
   }
 
   ASSERT_ARGUMENT(a, symbols->count == a->count - 1,
     "incorrect number of arguments");
 
+  /* TODO: use enums instead of string matching here */
   for (int i = 0; i < symbols->count; i++) {
-    environment_put(e, symbols->cell[i], a->cell[i + 1]);
+    if (strcmp(name, "define") == 0)
+      environment_put(e, symbols->cell[i], a->cell[i+1]);
+    else if (strcmp(name, "global") == 0)
+      environment_put_global(e, symbols->cell[i], a->cell[i+1]);
   }
 
   node_delete(a);
@@ -202,6 +216,24 @@ Node* builtin_exit(Environment* e, Node* a) {
   }
   node_delete(a);
   return exit_node;
+}
+
+Node* builtin_fn(Environment* e, Node* a) {
+  ASSERT_ARGUMENT_COUNT("fn", a, 2);
+  ASSERT_ARGUMENT_TYPE("fn", a, 0, NODE_Q_EXPRESSION);
+  ASSERT_ARGUMENT_TYPE("fn", a, 1, NODE_Q_EXPRESSION);
+
+  for (int i = 0; i < a->cell[0]->cell[i]->count; i++) {
+    ASSERT_ARGUMENT(a, (a->cell[0]->cell[i]->type == NODE_SYMBOL),
+      "Cannot define non-symbol. Got %s, expected %s.",
+      nodetype_name(a->cell[0]->cell[i]->type),
+      nodetype_name(NODE_SYMBOL));
+  }
+
+  Node* arguments = node_pop(a, 0);
+  Node* body = node_pop(a, 0);
+  node_delete(a);
+  return new_node_function(arguments, body);
 }
 
 void node_number_negate_mutate(Node* v) {

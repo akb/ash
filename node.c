@@ -7,6 +7,9 @@
 
 #include "node.h"
 
+Node* builtin_evaluate(Environment*, Node*);
+
+Node* node_call(Environment* e, Node* f, Node* a);
 void node_expression_print(Node*, char, char);
 Node* node_evaluate_s_expression(Environment* e, Node*);
 void node_print(Node*);
@@ -100,6 +103,16 @@ Node* new_node_builtin(BuiltIn builtin, char* name) {
   return v;
 }
 
+Node* new_node_function(Node* arguments, Node* body) {
+  Node* v = malloc(sizeof(Node));
+  v->type = NODE_FUNCTION;
+  v->builtin = NULL;
+  v->environment = new_environment();
+  v->arguments = arguments;
+  v->body = body;
+  return v;
+}
+
 Node* new_node_exit(int code) {
   Node* v = malloc(sizeof(Node));
   v->type = NODE_EXIT;
@@ -118,8 +131,16 @@ Node* node_copy(Node* v) {
       x->error = malloc(strlen(v->error) + 1);
       strcpy(x->error, v->error);
       break;
+    case NODE_FUNCTION:
     case NODE_BUILTIN:
-      x->builtin = v->builtin;
+      if (v->builtin) {
+        x->builtin = v->builtin;
+      } else {
+        x->builtin = NULL;
+        x->environment = environment_copy(v->environment);
+        x->arguments = node_copy(v->arguments);
+        x->body = node_copy(v->body);
+      }
     case NODE_SYMBOL:
       x->symbol = malloc(strlen(v->symbol) + 1);
       strcpy(x->symbol, v->symbol);
@@ -150,6 +171,10 @@ void node_delete(Node* v) {
         node_delete(v->cell[i]);
       free(v->cell);
       break;
+    case NODE_FUNCTION:
+      environment_delete(v->environment);
+      node_delete(v->arguments);
+      node_delete(v->body);
   }
   free(v);
 }
@@ -164,6 +189,12 @@ void node_print(Node* v) {
     case NODE_ERROR:        fprintf(stderr, "Error: %s", v->error);     break;
     case NODE_BUILTIN:      printf("<builtin:%s>", v->symbol);          break;
     case NODE_EXIT:         printf("Exiting. Code %d\n", v->exit_code); break;
+    case NODE_FUNCTION:
+      printf("(fn ");
+      node_print(v->arguments);
+      putchar(' ');
+      node_print(v->body);
+      putchar(' ');
   }
 }
 
@@ -211,7 +242,7 @@ Node* node_evaluate_s_expression(Environment* e, Node* v) {
     return new_node_error("S-Expression does not begin with a symbol.");
   }
 
-  Node* result = f->builtin(e, v);
+  Node* result = node_call(e, f, v);
   node_delete(f);
   return result;
 }
@@ -241,4 +272,37 @@ Node* node_add(Node* v, Node* x) {
   v->cell = realloc(v->cell, sizeof(Node*) * v->count);
   v->cell[v->count-1] = x;
   return v;
+}
+
+Node* node_call(Environment* e, Node* f, Node* a) {
+  if (f->builtin) return f->builtin(e, a);
+
+  int given = a->count;
+  int total = f->arguments->count;
+
+  while (a->count) {
+    if (f->arguments->count == 0) {
+      node_delete(a);
+      return new_node_error(
+        "Function passed too many arguments. "
+        "Got %i, Expected %i.", given, total);
+    }
+
+    Node* symbol = node_pop(f->arguments, 0);
+    Node* value = node_pop(a, 0);
+    environment_put(f->environment, symbol, value);
+    node_delete(symbol);
+    node_delete(value);
+  }
+
+  node_delete(a);
+
+  if (f->arguments->count == 0) {
+    f->environment->parent = e;
+    return builtin_evaluate(
+      f->environment, node_add(new_node_s_expression(), node_copy(f->body))
+    );
+  } else {
+    return node_copy(f);
+  }
 }

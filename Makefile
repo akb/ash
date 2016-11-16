@@ -6,7 +6,7 @@ CFLAGS=-std=c99 -Wall
 MACOS_CFLAGS=$(CFLAGS) -ledit
 LINUX_CFLAGS=$(MACOS_CFLAGS) -lm
 SRC_FILES=mpc.c environment.c builtins.c node.c \
-					editline.c parser.c ash.c
+					editline.c parser.c ash.c debug.c
 
 $(BINARY):
 	$(CC) $(CFLAGS) $(MACOS_CFLAGS) $(SRC_FILES) -o $(BINARY)

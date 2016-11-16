@@ -55,5 +55,6 @@ Node* builtin_initial(Environment*, Node*);
 
 Node* builtin_evaluate(Environment*, Node*);
 Node* builtin_define(Environment*, Node*);
+Node* builtin_fn(Environment*, Node*);
 
 Node* builtin_exit(Environment*, Node*);
