@@ -54,11 +54,11 @@ void environment_put(Environment* e, Node* k, Node* v) {
   e->nodes[e->count - 1] = node_copy(v);
 }
 
-void environment_add_builtin(Environment* e, char* name, BuiltIn function) {
+void environment_add_builtin(Environment* e, char* name, BuiltIn builtin) {
   Node* k = new_node_symbol(name);
   char display_name[strlen(name) + 3];
   sprintf(display_name, "(%s)", name);
-  Node* v = new_node_function(function, display_name);
+  Node* v = new_node_builtin(builtin, display_name);
   environment_put(e, k, v);
   node_delete(k);
   node_delete(v);

@@ -31,7 +31,7 @@ char* nodetype_name(int type) {
     case NODE_INTEGER:      return "integer";
     case NODE_DECIMAL:      return "decimal";
     case NODE_ERROR:        return "error";
-    case NODE_FUNCTION:     return "function";
+    case NODE_BUILTIN:      return "builtin";
     case NODE_EXIT:         return "exit";
     default:                return "unknown";
   }
@@ -90,10 +90,10 @@ Node* new_node_q_expression(void) {
   return v;
 }
 
-Node* new_node_function(BuiltIn function, char* name) {
+Node* new_node_builtin(BuiltIn builtin, char* name) {
   Node* v = malloc(sizeof(Node));
-  v->type = NODE_FUNCTION;
-  v->function = function;
+  v->type = NODE_BUILTIN;
+  v->builtin = builtin;
   if (name == NULL) name = "(anonymous)";
   v->symbol = malloc(strlen(name) + 1);
   strcpy(v->symbol, name);
@@ -118,8 +118,8 @@ Node* node_copy(Node* v) {
       x->error = malloc(strlen(v->error) + 1);
       strcpy(x->error, v->error);
       break;
-    case NODE_FUNCTION:
-      x->function = v->function;
+    case NODE_BUILTIN:
+      x->builtin = v->builtin;
     case NODE_SYMBOL:
       x->symbol = malloc(strlen(v->symbol) + 1);
       strcpy(x->symbol, v->symbol);
@@ -141,7 +141,7 @@ void node_delete(Node* v) {
     case NODE_EXIT:                    break;
     case NODE_INTEGER:                 break;
     case NODE_DECIMAL:                 break;
-    case NODE_FUNCTION:
+    case NODE_BUILTIN:
     case NODE_SYMBOL: free(v->symbol); break;
     case NODE_ERROR:  free(v->error);  break;
     case NODE_Q_EXPRESSION:
@@ -162,7 +162,7 @@ void node_print(Node* v) {
     case NODE_S_EXPRESSION: node_expression_print(v, '(', ')');         break;
     case NODE_Q_EXPRESSION: node_expression_print(v, '{', '}');         break;
     case NODE_ERROR:        fprintf(stderr, "Error: %s", v->error);     break;
-    case NODE_FUNCTION:     printf("<function:%s>", v->symbol);         break;
+    case NODE_BUILTIN:      printf("<builtin:%s>", v->symbol);          break;
     case NODE_EXIT:         printf("Exiting. Code %d\n", v->exit_code); break;
   }
 }
@@ -205,13 +205,13 @@ Node* node_evaluate_s_expression(Environment* e, Node* v) {
   if (v->count == 1) return node_take(v, 0);
 
   Node* f = node_pop(v, 0);
-  if (f->type != NODE_FUNCTION) {
+  if (f->type != NODE_BUILTIN) {
     node_delete(f);
     node_delete(v);
-    return new_node_error("S-Expression does not begin with a function.");
+    return new_node_error("S-Expression does not begin with a symbol.");
   }
 
-  Node* result = f->function(e, v);
+  Node* result = f->builtin(e, v);
   node_delete(f);
   return result;
 }

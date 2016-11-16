@@ -87,7 +87,7 @@ Node* builtin_head(Environment* e, Node* a) {
   ASSERT_ARGUMENT_COUNT("head", a, 1);
   ASSERT_ARGUMENT_TYPE("head", a, 0, NODE_Q_EXPRESSION);
   ASSERT_ARGUMENT(a, a->cell[0]->count != 0,
-    "Function \"head\" was passed {}");
+    "Builtin \"head\" was passed {}");
 
   Node* v = node_take(a, 0);
 
@@ -99,7 +99,7 @@ Node* builtin_tail(Environment* e, Node* a) {
   ASSERT_ARGUMENT_COUNT("tail", a, 1);
   ASSERT_ARGUMENT_TYPE("tail", a, 0, NODE_Q_EXPRESSION);
   ASSERT_ARGUMENT(a, a->cell[0]->count != 0,
-    "Function \"tail\" was passed {}");
+    "Builtin \"tail\" was passed {}");
 
   Node* v = node_take(a, 0);
   node_delete(node_pop(v, 0));

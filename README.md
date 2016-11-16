@@ -24,10 +24,11 @@ Added features:
 - "initial" builtin
 - Command-line argument parsing
 - "-s" command-line flag for disabling informational output
+- "exit" builtin w/ status code
 
 Problems that prevent this from being practical:
 - No Unicode support
-- S-expressions are variable arrays instead of linked-lists/cons cells
-- No user-defined symbols
+- S-expressions are variable-length arrays instead of linked-lists/cons cells
 - No conditionals
 - No loops/recursion
+- Unnecessary allocations (arrays and should use buffer pools)

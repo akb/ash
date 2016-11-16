@@ -20,20 +20,26 @@ enum {
   NODE_INTEGER,
   NODE_DECIMAL,
   NODE_ERROR,
-  NODE_FUNCTION,
+  NODE_BUILTIN,
   NODE_EXIT
 };
 
 typedef struct NodeStruct {
   int     type;
+
   long    integer;
   double  decimal;
   char*   error;
   char*   symbol;
-  BuiltIn function;
+  int     exit_code;
+
+  BuiltIn      builtin;
+  Environment* environment;
+  struct NodeStruct* arguments;
+  struct NodeStruct* body;
+
   int     count;
   struct  NodeStruct** cell;
-  int     exit_code;
 } Node;
 
 /**
@@ -80,9 +86,9 @@ Node* new_node_s_expression(void);
 Node* new_node_q_expression(void);
 
 /**
- * new_node_function(BuiltIn function)
+ * new_node_builtin(BuiltIn builtin)
  */
-Node* new_node_function(BuiltIn, char*);
+Node* new_node_builtin(BuiltIn, char*);
 
 /**
  * new_node_exit

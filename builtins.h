@@ -11,7 +11,7 @@
 #define ASSERT_ARGUMENT_COUNT(NAME, ARGS, COUNT) \
   if (ARGS->count != COUNT) { \
     Node* error = new_node_error( \
-      "Function '%s' was passed wrong number of arguments. Expected %i got %i.", \
+      "Builtin '%s' was passed wrong number of arguments. Expected %i got %i.", \
       NAME, COUNT, ARGS->count); \
     node_delete(ARGS); \
     return error; \
