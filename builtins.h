@@ -26,6 +26,19 @@
     return error; \
   }
 
+#define ASSERT_POSITIVE_INTEGER(ARGS, POS) \
+  if (ARGS->cell[POS]->integer < 0) { \
+    node_delete(ARGS); \
+    return new_node_error("Must be a positive integer."); \
+  }
+
+#define ASSERT_NUMBER(NAME, ARGS, POS) \
+  if (ARGS->cell[POS]->type != NODE_INTEGER && \
+      ARGS->cell[POS]->type != NODE_DECIMAL) { \
+    node_delete(ARGS); \
+    return new_node_error("Cannot call '%s' on non-number", NAME); \
+  }
+
 Node* builtin_divide(Environment*, Node*);
 Node* builtin_multiply(Environment*, Node*);
 Node* builtin_subtract(Environment*, Node*);
@@ -42,3 +55,5 @@ Node* builtin_initial(Environment*, Node*);
 
 Node* builtin_evaluate(Environment*, Node*);
 Node* builtin_define(Environment*, Node*);
+
+Node* builtin_exit(Environment*, Node*);

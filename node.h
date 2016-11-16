@@ -20,7 +20,8 @@ enum {
   NODE_INTEGER,
   NODE_DECIMAL,
   NODE_ERROR,
-  NODE_FUNCTION
+  NODE_FUNCTION,
+  NODE_EXIT
 };
 
 typedef struct NodeStruct {
@@ -32,6 +33,7 @@ typedef struct NodeStruct {
   BuiltIn function;
   int     count;
   struct  NodeStruct** cell;
+  int     exit_code;
 } Node;
 
 /**
@@ -81,6 +83,13 @@ Node* new_node_q_expression(void);
  * new_node_function(BuiltIn function)
  */
 Node* new_node_function(BuiltIn, char*);
+
+/**
+ * new_node_exit
+ * Creates a new Node which indicates to the runtime that the program should
+ * exit. The first argument specifies the exit code to return to the OS.
+ */
+Node* new_node_exit(int);
 
 /**
  * node_delete

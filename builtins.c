@@ -15,11 +15,7 @@ void node_number_modulo_mutate(Node*, Node*);
 
 Node* builtin_op(Environment* e, Node* a, char* op) {
   for (int i = 0; i < a->count; i++) {
-    if (a->cell[i]->type != NODE_INTEGER &&
-        a->cell[i]->type != NODE_DECIMAL) {
-      node_delete(a);
-      return new_node_error("Cannot call '%s' on non-number", op);
-    }
+    ASSERT_NUMBER(op, a, i);
   }
 
   Node* x = node_pop(a, 0);
@@ -188,6 +184,20 @@ Node* builtin_define(Environment* e, Node* a) {
 
   node_delete(a);
   return new_node_s_expression();
+}
+
+Node* builtin_exit(Environment* e, Node* a) {
+  Node* exit_node;
+  if (a->count == 0) {
+    exit_node = new_node_exit(0);
+  } else {
+    ASSERT_ARGUMENT_TYPE("exit", a, 0, NODE_INTEGER);
+    ASSERT_POSITIVE_INTEGER(a, 0);
+    Node* code_node = node_pop(a, 0);
+    exit_node = new_node_exit(code_node->integer);
+  }
+  node_delete(a);
+  return exit_node;
 }
 
 void node_number_negate_mutate(Node* v) {

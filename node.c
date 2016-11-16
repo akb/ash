@@ -32,6 +32,7 @@ char* nodetype_name(int type) {
     case NODE_DECIMAL:      return "decimal";
     case NODE_ERROR:        return "error";
     case NODE_FUNCTION:     return "function";
+    case NODE_EXIT:         return "exit";
     default:                return "unknown";
   }
 }
@@ -93,11 +94,16 @@ Node* new_node_function(BuiltIn function, char* name) {
   Node* v = malloc(sizeof(Node));
   v->type = NODE_FUNCTION;
   v->function = function;
-  if (name == NULL) {
-    name = "(anonymous)";
-  }
+  if (name == NULL) name = "(anonymous)";
   v->symbol = malloc(strlen(name) + 1);
   strcpy(v->symbol, name);
+  return v;
+}
+
+Node* new_node_exit(int code) {
+  Node* v = malloc(sizeof(Node));
+  v->type = NODE_EXIT;
+  v->exit_code = code;
   return v;
 }
 
@@ -132,6 +138,7 @@ Node* node_copy(Node* v) {
 
 void node_delete(Node* v) {
   switch (v->type) {
+    case NODE_EXIT:                    break;
     case NODE_INTEGER:                 break;
     case NODE_DECIMAL:                 break;
     case NODE_FUNCTION:
@@ -149,13 +156,14 @@ void node_delete(Node* v) {
 
 void node_print(Node* v) {
   switch (v->type) {
-    case NODE_INTEGER:      printf("%li", v->integer);              break;
-    case NODE_DECIMAL:      printf("%g", v->decimal);               break;
-    case NODE_SYMBOL:       printf("%s", v->symbol);                break;
-    case NODE_S_EXPRESSION: node_expression_print(v, '(', ')');     break;
-    case NODE_Q_EXPRESSION: node_expression_print(v, '{', '}');     break;
-    case NODE_ERROR:        fprintf(stderr, "Error: %s", v->error); break;
-    case NODE_FUNCTION:     printf("<function:%s>", v->symbol);     break;
+    case NODE_INTEGER:      printf("%li", v->integer);                  break;
+    case NODE_DECIMAL:      printf("%g", v->decimal);                   break;
+    case NODE_SYMBOL:       printf("%s", v->symbol);                    break;
+    case NODE_S_EXPRESSION: node_expression_print(v, '(', ')');         break;
+    case NODE_Q_EXPRESSION: node_expression_print(v, '{', '}');         break;
+    case NODE_ERROR:        fprintf(stderr, "Error: %s", v->error);     break;
+    case NODE_FUNCTION:     printf("<function:%s>", v->symbol);         break;
+    case NODE_EXIT:         printf("Exiting. Code %d\n", v->exit_code); break;
   }
 }
 

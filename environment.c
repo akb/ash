@@ -87,4 +87,6 @@ void environment_add_builtins(Environment* e) {
   environment_add_builtin(e, "multiply", builtin_multiply);
   environment_add_builtin(e, "divide", builtin_divide);
   environment_add_builtin(e, "modulo", builtin_modulo);
+
+  environment_add_builtin(e, "exit", builtin_exit);
 }

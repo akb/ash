@@ -30,7 +30,8 @@ int main(int argc, char** argv) {
 
   Environment* e = new_environment();
 
-  while (1) {
+  int exit_code = -1;
+  while (exit_code == -1) {
     char* input = readline("ash: ");
     if (input == NULL) break;
 
@@ -43,6 +44,7 @@ int main(int argc, char** argv) {
       //mpc_ast_print(r.output); // uncomment to display AST
       Node* result = node_evaluate(e, new_node_from_ast(r.output));
       node_println(result);
+      if (result->type == NODE_EXIT) exit_code = result->exit_code;
       node_delete(result);
       mpc_ast_delete(r.output);
     } else {
@@ -55,7 +57,7 @@ int main(int argc, char** argv) {
   }
 
   environment_delete(e);
-  return 0;
+  return exit_code;
 }
 
 void ash_parse_arguments(int argc, char** argv) {

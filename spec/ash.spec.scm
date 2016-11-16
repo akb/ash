@@ -98,3 +98,7 @@
 (it "can evaluate a list"
   '("10" "(evaluate {add 1 2 3 4})")
   '("30" "(evaluate (join {add} (list 10 10 10)))"))
+
+(it "can exit"
+  '("Exiting. Code 0" "(exit)")
+  '("Exiting. Code 1" "(exit 1)"))
