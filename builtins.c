@@ -1,8 +1,16 @@
 #include <stdlib.h>
 #include <strings.h>
+#include <math.h>
 
 #include "environment.h"
 #include "node.h"
+
+void node_number_negate_mutate(Node*);
+void node_number_add_mutate(Node*, Node*);
+void node_number_subtract_mutate(Node*, Node*);
+void node_number_multiply_mutate(Node*, Node*);
+void node_number_divide_mutate(Node*, Node*);
+void node_number_modulo_mutate(Node*, Node*);
 
 Node* builtin_op(Environment* e, Node* a, char* op) {
   for (int i = 0; i < a->count; i++) {
@@ -179,4 +187,70 @@ Node* builtin_define(Environment* e, Node* a) {
 
   node_delete(a);
   return new_node_s_expression();
+}
+
+void node_number_negate_mutate(Node* v) {
+  switch (v->type) {
+    case NODE_INTEGER:
+      v->integer = -v->integer;
+      return;
+    case NODE_DECIMAL:
+      v->decimal = -v->decimal;
+      return;
+  }
+}
+
+void node_number_add_mutate(Node* v, Node* x) {
+  switch (v->type) {
+    case NODE_INTEGER:
+      v->integer += x->integer;
+      return;
+    case NODE_DECIMAL:
+      v->decimal += x->decimal;
+      return;
+  }
+}
+
+void node_number_subtract_mutate(Node* v, Node* x) {
+  switch (v->type) {
+    case NODE_INTEGER:
+      v->integer -= x->integer;
+      return;
+    case NODE_DECIMAL:
+      v->decimal -= x->decimal;
+      return;
+  }
+}
+
+void node_number_multiply_mutate(Node* v, Node* x) {
+  switch (v->type) {
+    case NODE_INTEGER:
+      v->integer *= x->integer;
+      return;
+    case NODE_DECIMAL:
+      v->decimal *= x->decimal;
+      return;
+  }
+}
+
+void node_number_divide_mutate(Node* v, Node* x) {
+  switch (v->type) {
+    case NODE_INTEGER:
+      v->integer /= x->integer;
+      return;
+    case NODE_DECIMAL:
+      v->decimal /= x->decimal;
+      return;
+  }
+}
+
+void node_number_modulo_mutate(Node* v, Node* x) {
+  switch (v->type) {
+    case NODE_INTEGER:
+      v->integer %= x->integer;
+      return;
+    case NODE_DECIMAL:
+      v->decimal = fmod(v->decimal, x->decimal);
+      return;
+  }
 }

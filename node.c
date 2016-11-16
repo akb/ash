@@ -4,11 +4,12 @@
 #include <assert.h>
 #include <limits.h>
 #include <string.h>
-#include <math.h>
 
 #include "node.h"
 
 void node_expression_print(Node*, char, char);
+Node* node_evaluate_s_expression(Environment* e, Node*);
+void node_print(Node*);
 
 /**
  * dtol
@@ -225,72 +226,6 @@ Node* node_join(Node* x, Node* y) {
   while (y->count) x = node_add(x, node_pop(y, 0));
   node_delete(y);
   return x;
-}
-
-void node_number_negate_mutate(Node* v) {
-  switch (v->type) {
-    case NODE_INTEGER:
-      v->integer = -v->integer;
-      return;
-    case NODE_DECIMAL:
-      v->decimal = -v->decimal;
-      return;
-  }
-}
-
-void node_number_add_mutate(Node* v, Node* x) {
-  switch (v->type) {
-    case NODE_INTEGER:
-      v->integer += x->integer;
-      return;
-    case NODE_DECIMAL:
-      v->decimal += x->decimal;
-      return;
-  }
-}
-
-void node_number_subtract_mutate(Node* v, Node* x) {
-  switch (v->type) {
-    case NODE_INTEGER:
-      v->integer -= x->integer;
-      return;
-    case NODE_DECIMAL:
-      v->decimal -= x->decimal;
-      return;
-  }
-}
-
-void node_number_multiply_mutate(Node* v, Node* x) {
-  switch (v->type) {
-    case NODE_INTEGER:
-      v->integer *= x->integer;
-      return;
-    case NODE_DECIMAL:
-      v->decimal *= x->decimal;
-      return;
-  }
-}
-
-void node_number_divide_mutate(Node* v, Node* x) {
-  switch (v->type) {
-    case NODE_INTEGER:
-      v->integer /= x->integer;
-      return;
-    case NODE_DECIMAL:
-      v->decimal /= x->decimal;
-      return;
-  }
-}
-
-void node_number_modulo_mutate(Node* v, Node* x) {
-  switch (v->type) {
-    case NODE_INTEGER:
-      v->integer %= x->integer;
-      return;
-    case NODE_DECIMAL:
-      v->decimal = fmod(v->decimal, x->decimal);
-      return;
-  }
 }
 
 Node* node_add(Node* v, Node* x) {

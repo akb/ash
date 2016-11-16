@@ -58,6 +58,10 @@ typedef struct NodeStruct {
   struct  NodeStruct** cell;
 } Node;
 
+/**
+ * nodetype_name
+ * returns a string representation of the node type passed in.
+ */
 char* nodetype_name(int);
 
 /**
@@ -116,28 +120,14 @@ void node_delete(Node*);
 Node* node_copy(Node*);
 
 /**
- * node_print
- * Prints the passed-in Node to STDOUT
- */
-void node_print(Node*);
-
-/**
  * node_println
  * Prints the passed-in Node to STDOUT followed by a newline
  */
 void node_println(Node*);
 
 Node* node_evaluate(Environment* e, Node*);
-Node* node_evaluate_s_expression(Environment* e, Node*);
 Node* node_pop(Node*, int);
 Node* node_take(Node*, int);
 Node* node_join(Node* x, Node* y);
 Node* node_add(Node* v, Node* x);
-void node_number_negate_mutate(Node*);
-void node_number_add_mutate(Node*, Node*);
-void node_number_subtract_mutate(Node*, Node*);
-void node_number_multiply_mutate(Node*, Node*);
-void node_number_divide_mutate(Node*, Node*);
-void node_number_modulo_mutate(Node*, Node*);
-
 #endif

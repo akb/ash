@@ -14,6 +14,7 @@ Environment* new_environment(void) {
   e->count = 0;
   e->symbols = NULL;
   e->nodes = NULL;
+  environment_add_builtins(e);
   return e;
 }
 

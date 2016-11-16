@@ -29,7 +29,6 @@ int main(int argc, char** argv) {
   }
 
   Environment* e = new_environment();
-  environment_add_builtins(e);
 
   while (1) {
     char* input = readline("ash: ");
