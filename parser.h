@@ -13,7 +13,7 @@
 #define PARSER_TAG_EXPRESSION   "expression"
 #define PARSER_TAG_ASH          "ash"
 
-typedef struct AshParserStruct {
+typedef struct ParserStruct {
   mpc_parser_t* decimal;
   mpc_parser_t* integer;
   mpc_parser_t* number;
@@ -22,13 +22,9 @@ typedef struct AshParserStruct {
   mpc_parser_t* q_expression;
   mpc_parser_t* expression;
   mpc_parser_t* ash;
-} AshParser;
+} Parser;
 
-AshParser* new__AshParser(void);
-void AshParser__free(AshParser* parser);
-Node* FromIntegerAST__Node(mpc_ast_t* t);
-Node* FromDecimalAST__Node(mpc_ast_t* t);
-Node* FromSymbolAST__ResultVaule(mpc_ast_t* t);
-Node* FromSExpression__Node(mpc_ast_t* t);
-Node* FromAST__Node(mpc_ast_t* t);
+Parser* new_parser(void);
+void parser_delete(Parser* parser);
+Node* new_node_from_ast(mpc_ast_t* t);
 #endif

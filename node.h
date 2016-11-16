@@ -4,26 +4,26 @@
 
 #define ASSERT_ARGUMENT(ARGS, COND, FMT, ...) \
   if (!(COND)) { \
-    Node* error = new__ErrorNode(FMT, ##__VA_ARGS__); \
-    Node__free(ARGS); \
+    Node* error = new_node_error(FMT, ##__VA_ARGS__); \
+    node_delete(ARGS); \
     return error; \
   }
 
 #define ASSERT_ARGUMENT_COUNT(NAME, ARGS, COUNT) \
   if (ARGS->count != COUNT) { \
-    Node* error = new__ErrorNode( \
+    Node* error = new_node_error( \
       "Function '%s' was passed wrong number of arguments. Expected %i got %i.", \
       NAME, COUNT, ARGS->count); \
-    Node__free(ARGS); \
+    node_delete(ARGS); \
     return error; \
   }
 
 #define ASSERT_ARGUMENT_TYPE(NAME, ARGS, POS, TYPE) \
   if (ARGS->cell[POS]->type != TYPE) { \
-    Node* error = new__ErrorNode( \
+    Node* error = new_node_error( \
       "Wrong argument type passed to %s, position %i. Expected %s, got %s.", \
-      NAME, POS, NodeType__name(TYPE), NodeType__name(ARGS->cell[POS]->type)); \
-    Node__free(ARGS); \
+      NAME, POS, nodetype_name(TYPE), nodetype_name(ARGS->cell[POS]->type)); \
+    node_delete(ARGS); \
     return error; \
   }
 
@@ -58,124 +58,86 @@ typedef struct NodeStruct {
   struct  NodeStruct** cell;
 } Node;
 
-char* NodeType__name(int);
+char* nodetype_name(int);
 
 /**
- * new__IntegerNode
+ * new_node_integer
  * Constructs a new Node struct containing a long integer
  */
-Node* new__IntegerNode(long);
+Node* new_node_integer(long);
 
 /**
- * new__ErrorNode
+ * new_node_error
  * Constructs a new Node struct containing an error
  */
-Node* new__ErrorNode(char*, ...);
+Node* new_node_error(char*, ...);
 
 /**
- * new__DecimalNode
+ * new_node_decimal
  * Constructs a new Node struct containing a double precision floating
  * point number
  */
-Node* new__DecimalNode(double);
+Node* new_node_decimal(double);
 
 /**
- * new__SymbolNode
+ * new_node_symbol
  * Constructs a new Node struct containing a symbol
  */
-Node* new__SymbolNode(char*);
+Node* new_node_symbol(char*);
 
 /**
- * new__SExpressionNode
+ * new_node_s_expression
  * Constructs a new Node struct containing an empty S-Expression
  */
-Node* new__SExpressionNode(void);
+Node* new_node_s_expression(void);
 
 /**
- * new__QExpressionNode
+ * new_node_q_expression
  * Constructs a new Node struct containing an empty Q-Expression
  */
-Node* new__QExpressionNode(void);
+Node* new_node_q_expression(void);
 
 /**
- * new__FunctionNode(BuiltIn function)
+ * new_node_function(BuiltIn function)
  */
-Node* new__FunctionNode(BuiltIn, char*);
+Node* new_node_function(BuiltIn, char*);
 
 /**
- * Node__free
+ * node_delete
  * Frees any memory allocated to the passed-in Node, deleting the
  * Node
  */
-void Node__free(Node*);
+void node_delete(Node*);
 
 /**
- * Node* Node__copy(Node*);
+ * Node* node_copy(Node*);
  * Creates a copy of the passed-in Node and returns it
  */
-Node* Node__copy(Node*);
+Node* node_copy(Node*);
 
 /**
- * Node__print
+ * node_print
  * Prints the passed-in Node to STDOUT
  */
-void Node__print(Node*);
+void node_print(Node*);
 
 /**
- * IntegerNode__print
- * Prints the passed-in Node containing an integer to STDOUT
- */
-void IntegerNode__print(Node*);
-
-/**
- * DecimalNode__print
- * Prints the passed-in Node containing a decimal number to STDOUT
- */
-void DecimalNode__print(Node*);
-
-/**
- * ErrorNode__print
- * Prints the passed-in Node containing an error to STDOUT
- */
-void ErrorNode__print(Node*);
-
-/**
- * SymbolNode__print
- * Prints the passed-in Node containing a symbol to STDOUT
- */
-void SymbolNode__print(Node*);
-
-/**
- * ExpressionNode__print
- * Prints the passed-in Node containing an expression to STDOUT
- */
-void ExpressionNode__print(Node*, char, char);
-
-/**
- * Node__println
+ * node_println
  * Prints the passed-in Node to STDOUT followed by a newline
  */
-void Node__println(Node*);
+void node_println(Node*);
 
-/**
- */
-double Node__to_double(Node*);
-
-/**
- */
-long Node__to_long(Node*);
-
-Node* Node__evaluate(Environment* e, Node*);
-Node* Node__evaluate_s_expression(Environment* e, Node*);
-Node* Node__pop(Node*, int);
-Node* Node__take(Node*, int);
-Node* Node__join(Node* x, Node* y);
-Node* Node__add(Node* v, Node* x);
-void NumberNode__negate_mutate(Node*);
-void NumberNode__add_mutate(Node*, Node*);
-void NumberNode__subtract_mutate(Node*, Node*);
-void NumberNode__multiply_mutate(Node*, Node*);
-void NumberNode__divide_mutate(Node*, Node*);
-void NumberNode__modulo_mutate(Node*, Node*);
+Node* node_evaluate(Environment* e, Node*);
+Node* node_evaluate_s_expression(Environment* e, Node*);
+Node* node_pop(Node*, int);
+Node* node_take(Node*, int);
+Node* node_join(Node* x, Node* y);
+Node* node_add(Node* v, Node* x);
+void node_number_negate_mutate(Node*);
+void node_number_add_mutate(Node*, Node*);
+void node_number_subtract_mutate(Node*, Node*);
+void node_number_multiply_mutate(Node*, Node*);
+void node_number_divide_mutate(Node*, Node*);
+void node_number_modulo_mutate(Node*, Node*);
 
 #endif

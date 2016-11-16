@@ -20,7 +20,7 @@ Environment* new_environment(void) {
 void environment_delete(Environment* e) {
   for (int i = 0; i < e->count; i++) {
     free(e->symbols[i]);
-    Node__free(e->nodes[i]);
+    node_delete(e->nodes[i]);
   }
   free(e->symbols);
   free(e->nodes);
@@ -30,15 +30,15 @@ void environment_delete(Environment* e) {
 Node* environment_get(Environment* e, Node* k) {
   for (int i = 0; i < e->count; i++)
     if (strcmp(e->symbols[i], k->symbol) == 0)
-      return Node__copy(e->nodes[i]);
-  return new__ErrorNode("Undefined symbol '%s'", k->symbol);
+      return node_copy(e->nodes[i]);
+  return new_node_error("Undefined symbol '%s'", k->symbol);
 }
 
 void environment_put(Environment* e, Node* k, Node* v) {
   for (int i = 0; i < e->count; i++) {
     if (strcmp(e->symbols[i], k->symbol) == 0) {
-      Node__free(e->nodes[i]);
-      e->nodes[i] = Node__copy(v);
+      node_delete(e->nodes[i]);
+      e->nodes[i] = node_copy(v);
       return;
     }
   }
@@ -50,17 +50,17 @@ void environment_put(Environment* e, Node* k, Node* v) {
   e->symbols[e->count - 1] = malloc(strlen(k->symbol) + 1);
   strcpy(e->symbols[e->count - 1], k->symbol);
 
-  e->nodes[e->count - 1] = Node__copy(v);
+  e->nodes[e->count - 1] = node_copy(v);
 }
 
 void environment_add_builtin(Environment* e, char* name, BuiltIn function) {
-  Node* k = new__SymbolNode(name);
+  Node* k = new_node_symbol(name);
   char display_name[strlen(name) + 3];
   sprintf(display_name, "(%s)", name);
-  Node* v = new__FunctionNode(function, display_name);
+  Node* v = new_node_function(function, display_name);
   environment_put(e, k, v);
-  Node__free(k);
-  Node__free(v);
+  node_delete(k);
+  node_delete(v);
 }
 
 void environment_add_builtins(Environment* e) {

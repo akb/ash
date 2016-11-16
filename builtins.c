@@ -8,19 +8,19 @@ Node* builtin_op(Environment* e, Node* a, char* op) {
   for (int i = 0; i < a->count; i++) {
     if (a->cell[i]->type != NODE_INTEGER &&
         a->cell[i]->type != NODE_DECIMAL) {
-      Node__free(a);
-      return new__ErrorNode("Cannot call '%s' on non-number", op);
+      node_delete(a);
+      return new_node_error("Cannot call '%s' on non-number", op);
     }
   }
 
-  Node* x = Node__pop(a, 0);
+  Node* x = node_pop(a, 0);
 
   if ((strcmp(op, "-") || strcmp(op, "subtract")) && a->count == 0) {
-    NumberNode__negate_mutate(x);
+    node_number_negate_mutate(x);
   }
 
   while (a->count > 0) {
-    Node* y = Node__pop(a, 0);
+    Node* y = node_pop(a, 0);
     if ((x->type == NODE_DECIMAL) != (y->type == NODE_DECIMAL)) {
       if (x->type == NODE_INTEGER) {
         x->type = NODE_DECIMAL;
@@ -32,29 +32,29 @@ Node* builtin_op(Environment* e, Node* a, char* op) {
       }
     }
     if (strcmp(op, "+") == 0 || strcmp(op, "add") == 0)
-      NumberNode__add_mutate(x, y);
+      node_number_add_mutate(x, y);
     if (strcmp(op, "-") == 0 || strcmp(op, "subtract") == 0)
-      NumberNode__subtract_mutate(x, y);
+      node_number_subtract_mutate(x, y);
     if (strcmp(op, "*") == 0 || strcmp(op, "multiply") == 0)
-      NumberNode__multiply_mutate(x, y);
+      node_number_multiply_mutate(x, y);
     if (strcmp(op, "%") == 0 || strcmp(op, "modulo") == 0)
-      NumberNode__modulo_mutate(x, y);
+      node_number_modulo_mutate(x, y);
     if (strcmp(op, "/") == 0 || strcmp(op, "divide") == 0) {
       if ((y->type == NODE_INTEGER && y->integer == 0) ||
           (y->type == NODE_DECIMAL && y->decimal == 0.0)) {
-        Node__free(x);
-        Node__free(y);
-        x = new__ErrorNode("Cannot divide by zero.");
+        node_delete(x);
+        node_delete(y);
+        x = new_node_error("Cannot divide by zero.");
         break;
       } else {
-        NumberNode__divide_mutate(x, y);
+        node_number_divide_mutate(x, y);
       }
     }
 
-    Node__free(y);
+    node_delete(y);
   }
 
-  Node__free(a);
+  node_delete(a);
   return x;
 }
 
@@ -84,9 +84,9 @@ Node* builtin_head(Environment* e, Node* a) {
   ASSERT_ARGUMENT(a, a->cell[0]->count != 0,
     "Function \"head\" was passed {}");
 
-  Node* v = Node__take(a, 0);
+  Node* v = node_take(a, 0);
 
-  while (v->count > 1) Node__free(Node__pop(v, 1));
+  while (v->count > 1) node_delete(node_pop(v, 1));
   return v;
 }
 
@@ -96,8 +96,8 @@ Node* builtin_tail(Environment* e, Node* a) {
   ASSERT_ARGUMENT(a, a->cell[0]->count != 0,
     "Function \"tail\" was passed {}");
 
-  Node* v = Node__take(a, 0);
-  Node__free(Node__pop(v, 0));
+  Node* v = node_take(a, 0);
+  node_delete(node_pop(v, 0));
   return v;
 }
 
@@ -110,9 +110,9 @@ Node* builtin_evaluate(Environment* e, Node* a) {
   ASSERT_ARGUMENT_COUNT("evaluate", a, 1);
   ASSERT_ARGUMENT_TYPE("evaluate", a, 0, NODE_Q_EXPRESSION);
 
-  Node* x = Node__take(a, 0);
+  Node* x = node_take(a, 0);
   x->type = NODE_S_EXPRESSION;
-  return Node__evaluate(e, x);
+  return node_evaluate(e, x);
 }
 
 Node* builtin_join(Environment* e, Node* a) {
@@ -120,10 +120,10 @@ Node* builtin_join(Environment* e, Node* a) {
     ASSERT_ARGUMENT_TYPE("join", a, i, NODE_Q_EXPRESSION);
   }
 
-  Node* x = Node__pop(a, 0);
-  while (a->count) x = Node__join(x, Node__pop(a, 0));
+  Node* x = node_pop(a, 0);
+  while (a->count) x = node_join(x, node_pop(a, 0));
 
-  Node__free(a);
+  node_delete(a);
   return x;
 }
 
@@ -131,12 +131,12 @@ Node* builtin_construct(Environment* e, Node* a) {
   ASSERT_ARGUMENT_COUNT("construct", a, 2);
   ASSERT_ARGUMENT_TYPE("construct", a, 1, NODE_Q_EXPRESSION);
 
-  Node* head = Node__pop(a, 0);
-  Node* tail = Node__pop(a, 0);
-  Node__free(a);
-  Node* x = new__QExpressionNode();
-  x = Node__add(x, head);
-  while (tail->count) x = Node__add(x, Node__pop(tail, 0));
+  Node* head = node_pop(a, 0);
+  Node* tail = node_pop(a, 0);
+  node_delete(a);
+  Node* x = new_node_q_expression();
+  x = node_add(x, head);
+  while (tail->count) x = node_add(x, node_pop(tail, 0));
   return x;
 }
 
@@ -145,19 +145,19 @@ Node* builtin_length(Environment* e, Node* a) {
   ASSERT_ARGUMENT_TYPE("length", a, 0, NODE_Q_EXPRESSION);
 
   long count = a->cell[0]->count;
-  Node__free(a);
-  return new__IntegerNode(count);
+  node_delete(a);
+  return new_node_integer(count);
 }
 
 Node* builtin_initial(Environment* e, Node* a) {
   ASSERT_ARGUMENT_COUNT("initial", a, 1);
   ASSERT_ARGUMENT_TYPE("initial", a, 0, NODE_Q_EXPRESSION);
 
-  Node* list = Node__pop(a, 0);
-  Node__free(a);
+  Node* list = node_pop(a, 0);
+  node_delete(a);
 
-  Node* x = new__QExpressionNode();
-  while (list->count > 1) x = Node__add(x, Node__pop(list, 0));
+  Node* x = new_node_q_expression();
+  while (list->count > 1) x = node_add(x, node_pop(list, 0));
   return x;
 }
 
@@ -177,6 +177,6 @@ Node* builtin_define(Environment* e, Node* a) {
     environment_put(e, symbols->cell[i], a->cell[i + 1]);
   }
 
-  Node__free(a);
-  return new__SExpressionNode();
+  node_delete(a);
+  return new_node_s_expression();
 }

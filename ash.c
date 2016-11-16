@@ -37,21 +37,21 @@ int main(int argc, char** argv) {
 
     add_history(input);
 
-    AshParser* parser = new__AshParser();
+    Parser* parser = new_parser();
 
     mpc_result_t r;
     if (mpc_parse("<stdin>", input, parser->ash, &r)) {
       //mpc_ast_print(r.output); // uncomment to display AST
-      Node* result = Node__evaluate(e, FromAST__Node(r.output));
-      Node__println(result);
-      Node__free(result);
+      Node* result = node_evaluate(e, new_node_from_ast(r.output));
+      node_println(result);
+      node_delete(result);
       mpc_ast_delete(r.output);
     } else {
       mpc_err_print(r.error);
       mpc_err_delete(r.error);
     }
 
-    AshParser__free(parser);
+    parser_delete(parser);
     free(input);
   }
 
