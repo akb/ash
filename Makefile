@@ -15,4 +15,4 @@ clean:
 	rm -rf bin/ash
 
 test:
-	csi -s spec/ash.scm
+	csi -s spec/ash.spec.scm

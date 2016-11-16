@@ -1,10 +1,10 @@
-(include "spec/spec-cli")
+(include "spec/spec")
 
 (display "Basic mathematical operations.\n")
 
 (it "can add numbers"
-  '("2" "(+ 1 1)")
-  '("3" "(+ 1 1 1)")
+  '("2"  "(+ 1 1)")
+  '("3"  "(+ 1 1 1)")
   '("23" "(add 5 8 10)"))
 
 (it "can multiply numbers"
