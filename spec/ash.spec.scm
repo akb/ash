@@ -102,3 +102,8 @@
 (it "can exit"
   '("Exiting. Code 0" "(exit)")
   '("Exiting. Code 1" "(exit 1)"))
+
+; TODO: actually test exit status
+
+(it "can define a function and call it"
+  '("25" "(define {timesfive} (fn {x} {multiply 5 x}))" "(timesfive 5)"))

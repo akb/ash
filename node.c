@@ -5,6 +5,7 @@
 #include <limits.h>
 #include <string.h>
 
+#include "debug.h"
 #include "node.h"
 
 Node* builtin_evaluate(Environment*, Node*);
@@ -104,12 +105,14 @@ Node* new_node_builtin(BuiltIn builtin, char* name) {
 }
 
 Node* new_node_function(Node* arguments, Node* body) {
+  log_debug("new_node_function: start");
   Node* v = malloc(sizeof(Node));
   v->type = NODE_FUNCTION;
   v->builtin = NULL;
   v->environment = new_environment();
   v->arguments = arguments;
   v->body = body;
+  log_debug("new_node_function: returning");
   return v;
 }
 
@@ -225,6 +228,7 @@ Node* node_evaluate(Environment* e, Node* v) {
 }
 
 Node* node_evaluate_s_expression(Environment* e, Node* v) {
+  log_debug("node_evaluate_s_expression: start");
   for (int i = 0; i < v->count; i++)
     v->cell[i] = node_evaluate(e, v->cell[i]);
 
@@ -237,13 +241,20 @@ Node* node_evaluate_s_expression(Environment* e, Node* v) {
 
   Node* f = node_pop(v, 0);
   if (f->type != NODE_BUILTIN) {
+    log_debug("node_evaluate_s_expression: first arg is not a builtin");
     node_delete(f);
     node_delete(v);
     return new_node_error("S-Expression does not begin with a symbol.");
   }
 
+  log_debug("node_evaluate_s_expression: first arg is a builtin");
+  for (int i = 0; i < 2; i++) {
+    log_debug("fnord %i", i);
+  }
   Node* result = node_call(e, f, v);
+  log_debug("node_evaluate_s_expression: function call complete");
   node_delete(f);
+  log_debug("node_evaluate_s_expression: returning result");
   return result;
 }
 
@@ -300,7 +311,8 @@ Node* node_call(Environment* e, Node* f, Node* a) {
   if (f->arguments->count == 0) {
     f->environment->parent = e;
     return builtin_evaluate(
-      f->environment, node_add(new_node_s_expression(), node_copy(f->body))
+      f->environment,
+      node_add(new_node_s_expression(), node_copy(f->body))
     );
   } else {
     return node_copy(f);

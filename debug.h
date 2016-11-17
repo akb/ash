@@ -1,3 +1,5 @@
-void log_debug(char* format, ...);
+#include <stdbool.h>
 
-static bool flag_debug  = false;
+extern bool flag_debug;
+
+void log_debug(char* format, ...);

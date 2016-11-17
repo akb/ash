@@ -6,6 +6,7 @@
   #include <string.h>
 #endif
 
+#include "debug.h"
 #include "environment.h"
 #include "node.h"
 #include "builtins.h"
@@ -219,20 +220,24 @@ Node* builtin_exit(Environment* e, Node* a) {
 }
 
 Node* builtin_fn(Environment* e, Node* a) {
+  log_debug("builtin_fn: start");
   ASSERT_ARGUMENT_COUNT("fn", a, 2);
   ASSERT_ARGUMENT_TYPE("fn", a, 0, NODE_Q_EXPRESSION);
   ASSERT_ARGUMENT_TYPE("fn", a, 1, NODE_Q_EXPRESSION);
 
-  for (int i = 0; i < a->cell[0]->cell[i]->count; i++) {
+  for (int i = 0; i < a->cell[0]->count; i++) {
     ASSERT_ARGUMENT(a, (a->cell[0]->cell[i]->type == NODE_SYMBOL),
       "Cannot define non-symbol. Got %s, expected %s.",
       nodetype_name(a->cell[0]->cell[i]->type),
       nodetype_name(NODE_SYMBOL));
   }
+  log_debug("builtin_fn: done with interface checks");
 
   Node* arguments = node_pop(a, 0);
   Node* body = node_pop(a, 0);
+  log_debug("builtin_fn: popped arguments");
   node_delete(a);
+  log_debug("builtin_fn: deleted arguments, returning new_node_function");
   return new_node_function(arguments, body);
 }
 
