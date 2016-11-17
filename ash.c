@@ -7,9 +7,6 @@
 #include "editline.h"
 #else
 #include <editline/readline.h>
-#ifndef __APPLE__
-  #include <editline/history.h>
-  #endif
 #endif
 
 #include "mpc.h"
