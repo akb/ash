@@ -27,6 +27,7 @@ int main(int argc, char** argv) {
   }
 
   Environment* e = new_environment();
+  environment_add_builtins(e);
 
   int exit_code = -1;
   while (exit_code == -1) {

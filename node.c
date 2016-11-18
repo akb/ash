@@ -35,7 +35,7 @@ char* nodetype_name(int type) {
     case NODE_INTEGER:      return "integer";
     case NODE_DECIMAL:      return "decimal";
     case NODE_ERROR:        return "error";
-    case NODE_BUILTIN:      return "builtin";
+    case NODE_FUNCTION:     return "function";
     case NODE_EXIT:         return "exit";
     default:                return "unknown";
   }
@@ -96,7 +96,7 @@ Node* new_node_q_expression(void) {
 
 Node* new_node_builtin(BuiltIn builtin, char* name) {
   Node* v = malloc(sizeof(Node));
-  v->type = NODE_BUILTIN;
+  v->type = NODE_FUNCTION;
   v->builtin = builtin;
   if (name == NULL) name = "(anonymous)";
   v->symbol = malloc(strlen(name) + 1);
@@ -112,7 +112,6 @@ Node* new_node_function(Node* arguments, Node* body) {
   v->environment = new_environment();
   v->arguments = arguments;
   v->body = body;
-  log_debug("new_node_function: returning");
   return v;
 }
 
@@ -135,7 +134,6 @@ Node* node_copy(Node* v) {
       strcpy(x->error, v->error);
       break;
     case NODE_FUNCTION:
-    case NODE_BUILTIN:
       if (v->builtin) {
         x->builtin = v->builtin;
       } else {
@@ -145,6 +143,7 @@ Node* node_copy(Node* v) {
         x->body = node_copy(v->body);
       }
     case NODE_SYMBOL:
+      if (v->symbol == NULL) break;
       x->symbol = malloc(strlen(v->symbol) + 1);
       strcpy(x->symbol, v->symbol);
       break;
@@ -161,11 +160,11 @@ Node* node_copy(Node* v) {
 }
 
 void node_delete(Node* v) {
+  log_debug("node_delete: start");
   switch (v->type) {
     case NODE_EXIT:                    break;
     case NODE_INTEGER:                 break;
     case NODE_DECIMAL:                 break;
-    case NODE_BUILTIN:
     case NODE_SYMBOL: free(v->symbol); break;
     case NODE_ERROR:  free(v->error);  break;
     case NODE_Q_EXPRESSION:
@@ -175,9 +174,13 @@ void node_delete(Node* v) {
       free(v->cell);
       break;
     case NODE_FUNCTION:
-      environment_delete(v->environment);
-      node_delete(v->arguments);
-      node_delete(v->body);
+      if (v->builtin) {
+        free(v->symbol);
+      } else {
+        node_delete(v->arguments);
+        node_delete(v->body);
+        environment_delete(v->environment);
+      }
   }
   free(v);
 }
@@ -190,14 +193,17 @@ void node_print(Node* v) {
     case NODE_S_EXPRESSION: node_expression_print(v, '(', ')');         break;
     case NODE_Q_EXPRESSION: node_expression_print(v, '{', '}');         break;
     case NODE_ERROR:        fprintf(stderr, "Error: %s", v->error);     break;
-    case NODE_BUILTIN:      printf("<builtin:%s>", v->symbol);          break;
     case NODE_EXIT:         printf("Exiting. Code %d\n", v->exit_code); break;
     case NODE_FUNCTION:
-      printf("(fn ");
-      node_print(v->arguments);
-      putchar(' ');
-      node_print(v->body);
-      putchar(' ');
+      if (v->builtin) {
+        printf("<builtin:%s>", v->symbol);
+      } else {
+        printf("(fn ");
+        node_print(v->arguments);
+        putchar(' ');
+        node_print(v->body);
+        putchar(' ');
+      }
   }
 }
 
@@ -216,6 +222,7 @@ void node_println(Node* v) {
 }
 
 Node* node_evaluate(Environment* e, Node* v) {
+  log_debug("node_evaluate: start");
   if (v->type == NODE_SYMBOL) {
     Node* x = environment_get(e, v);
     node_delete(v);
@@ -240,21 +247,15 @@ Node* node_evaluate_s_expression(Environment* e, Node* v) {
   if (v->count == 1) return node_take(v, 0);
 
   Node* f = node_pop(v, 0);
-  if (f->type != NODE_BUILTIN) {
-    log_debug("node_evaluate_s_expression: first arg is not a builtin");
+  if (f->type != NODE_FUNCTION) {
+    fprintf(stderr, "NOTAFUNCITON NODE TYPE: %s\n", nodetype_name(f->type));
     node_delete(f);
     node_delete(v);
     return new_node_error("S-Expression does not begin with a symbol.");
   }
 
-  log_debug("node_evaluate_s_expression: first arg is a builtin");
-  for (int i = 0; i < 2; i++) {
-    log_debug("fnord %i", i);
-  }
   Node* result = node_call(e, f, v);
-  log_debug("node_evaluate_s_expression: function call complete");
   node_delete(f);
-  log_debug("node_evaluate_s_expression: returning result");
   return result;
 }
 
@@ -286,7 +287,10 @@ Node* node_add(Node* v, Node* x) {
 }
 
 Node* node_call(Environment* e, Node* f, Node* a) {
-  if (f->builtin) return f->builtin(e, a);
+  log_debug("node_call: start");
+  if (f->builtin != NULL) {
+    return f->builtin(e, a);
+  }
 
   int given = a->count;
   int total = f->arguments->count;

@@ -186,9 +186,8 @@ Node* builtin_var(Environment* e, Node* a, char* name) {
 
   Node* symbols = a->cell[0];
 
-  for (int i = 0; i < symbols->count - 1; i++) {
+  for (int i = 0; i < symbols->count - 1; i++)
     ASSERT_ARGUMENT_TYPE(name, symbols, i, NODE_SYMBOL);
-  }
 
   ASSERT_ARGUMENT(a, symbols->count == a->count - 1,
     "incorrect number of arguments");
@@ -202,6 +201,7 @@ Node* builtin_var(Environment* e, Node* a, char* name) {
   }
 
   node_delete(a);
+  /* FIXME: returning empty s-expr doesn't seem right */
   return new_node_s_expression();
 }
 

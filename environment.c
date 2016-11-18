@@ -6,6 +6,7 @@
   #include <string.h>
 #endif
 
+#include "debug.h"
 #include "environment.h"
 #include "node.h"
 #include "builtins.h"
@@ -19,7 +20,6 @@ Environment* new_environment(void) {
   e->count = 0;
   e->symbols = NULL;
   e->nodes = NULL;
-  environment_add_builtins(e);
   return e;
 }
 
@@ -80,22 +80,27 @@ void environment_put(Environment* e, Node* k, Node* v) {
 }
 
 void environment_put_global(Environment* e, Node* k, Node* v) {
-  while (e->parent) e = e->parent;
+  while (e->parent) { e = e->parent; }
   environment_put(e, k, v);
 }
 
 void environment_add_builtin(Environment* e, char* name, BuiltIn builtin) {
+  log_debug("environment_add_builtin: start");
   Node* k = new_node_symbol(name);
   char display_name[strlen(name) + 3];
   sprintf(display_name, "(%s)", name);
   Node* v = new_node_builtin(builtin, display_name);
+  log_debug("writing builtin to environment");
   environment_put(e, k, v);
+  log_debug("deleting node k");
   node_delete(k);
+  log_debug("deleting node v");
   node_delete(v);
 }
 
 void environment_add_builtins(Environment* e) {
   environment_add_builtin(e, "define", builtin_define);
+  environment_add_builtin(e, "global", builtin_global);
   environment_add_builtin(e, "fn", builtin_fn);
 
   environment_add_builtin(e, "list", builtin_list);

@@ -20,7 +20,8 @@
 (define (check-condition condition)
   (let ((actual   (s-chomp (ash-eval (cdr condition))))
         (expected (irregex-quote (car condition))))
-    (if (irregex-match expected actual) #t (list (cadr condition) expected actual))))
+    (let ((actual-last (last (s-split "\n" actual))))
+      (if (irregex-match expected actual-last) #t (list (cadr condition) expected actual-last)))))
 
 (define (ash-eval expressions)
   (let ((code (s-join "\n" expressions)))
