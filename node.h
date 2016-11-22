@@ -2,7 +2,6 @@
 #define NODE_TYPE_DEFINED
 #include "environment.h"
 
-
 /**
  * NODE_INTEGER
  * Indicates that the Node contains an integer
@@ -20,24 +19,29 @@ enum {
   NODE_INTEGER,
   NODE_DECIMAL,
   NODE_ERROR,
-  NODE_BUILTIN,
+  NODE_FUNCTION,
   NODE_EXIT
 };
 
 typedef struct NodeStruct {
   int     type;
 
-  long    integer;
-  double  decimal;
-  char*   error;
-  char*   symbol;
-  int     exit_code;
+  /* simple */
+  long   integer;
+  double decimal;
+  char*  error;
+  char*  symbol;
+  int    exit_code;
 
-  BuiltIn      builtin;
+  /* builtin function */
+  BuiltIn builtin;
+
+  /* lambda function */
   Environment* environment;
   struct NodeStruct* arguments;
   struct NodeStruct* body;
 
+  /* expression */
   int     count;
   struct  NodeStruct** cell;
 } Node;
@@ -89,6 +93,11 @@ Node* new_node_q_expression(void);
  * new_node_builtin(BuiltIn builtin)
  */
 Node* new_node_builtin(BuiltIn, char*);
+
+/**
+ * new_node_function
+ */
+Node* new_node_function(Node*, Node*);
 
 /**
  * new_node_exit

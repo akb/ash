@@ -10,6 +10,7 @@
 #endif
 
 #include "mpc.h"
+#include "debug.h"
 #include "environment.h"
 #include "node.h"
 #include "parser.h"
@@ -21,11 +22,11 @@ void ash_parse_arguments(int, char**);
 
 int main(int argc, char** argv) {
   ash_parse_arguments(argc, argv);
-  if (flag_silent == false) {
+  if (flag_silent == false)
     ash_print_startup_message();
-  }
 
   Environment* e = new_environment();
+  environment_add_builtins(e);
 
   int exit_code = -1;
   while (exit_code == -1) {
@@ -38,7 +39,7 @@ int main(int argc, char** argv) {
 
     mpc_result_t r;
     if (mpc_parse("<stdin>", input, parser->ash, &r)) {
-      //mpc_ast_print(r.output); // uncomment to display AST
+      if (flag_debug == true) mpc_ast_print(r.output);
       Node* result = node_evaluate(e, new_node_from_ast(r.output));
       node_println(result);
       if (result->type == NODE_EXIT) exit_code = result->exit_code;
@@ -59,14 +60,13 @@ int main(int argc, char** argv) {
 
 void ash_parse_arguments(int argc, char** argv) {
   int opt;
-  while ((opt = getopt(argc, argv, "s")) != -1) {
+  while ((opt = getopt(argc, argv, "sd")) != -1) {
     switch (opt) {
       case 's': flag_silent = true; break;
-      default: goto parse_arguments_done;
+      case 'd': flag_debug  = true; break;
+      default: return;
     }
   }
-parse_arguments_done:
-  return;
 }
 
 void ash_print_startup_message() {

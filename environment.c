@@ -6,6 +6,7 @@
   #include <string.h>
 #endif
 
+#include "debug.h"
 #include "environment.h"
 #include "node.h"
 #include "builtins.h"
@@ -15,10 +16,10 @@
  */
 Environment* new_environment(void) {
   Environment* e = malloc(sizeof(Environment));
+  e->parent = NULL;
   e->count = 0;
   e->symbols = NULL;
   e->nodes = NULL;
-  environment_add_builtins(e);
   return e;
 }
 
@@ -32,11 +33,31 @@ void environment_delete(Environment* e) {
   free(e);
 }
 
+Environment* environment_copy(Environment* e) {
+  Environment* n = malloc(sizeof(Environment));
+
+  n->parent = e->parent;
+  n->count = e->count;
+  n->symbols = malloc(sizeof(char*) * n->count);
+  n->nodes = malloc(sizeof(Node*) * n->count);
+
+  for (int i = 0; i < e->count; i++) {
+    n->symbols[i] = malloc(strlen(e->symbols[i]) + 1);
+    strcpy(n->symbols[i], e->symbols[i]);
+    n->nodes[i] = node_copy(e->nodes[i]);
+  }
+  return n;
+}
+
 Node* environment_get(Environment* e, Node* k) {
   for (int i = 0; i < e->count; i++)
     if (strcmp(e->symbols[i], k->symbol) == 0)
       return node_copy(e->nodes[i]);
-  return new_node_error("Undefined symbol '%s'", k->symbol);
+
+  if (e->parent)
+    return environment_get(e->parent, k);
+  else
+    return new_node_error("Undefined symbol '%s'", k->symbol);
 }
 
 void environment_put(Environment* e, Node* k, Node* v) {
@@ -58,6 +79,11 @@ void environment_put(Environment* e, Node* k, Node* v) {
   e->nodes[e->count - 1] = node_copy(v);
 }
 
+void environment_put_global(Environment* e, Node* k, Node* v) {
+  while (e->parent) e = e->parent;
+  environment_put(e, k, v);
+}
+
 void environment_add_builtin(Environment* e, char* name, BuiltIn builtin) {
   Node* k = new_node_symbol(name);
   char display_name[strlen(name) + 3];
@@ -70,6 +96,8 @@ void environment_add_builtin(Environment* e, char* name, BuiltIn builtin) {
 
 void environment_add_builtins(Environment* e) {
   environment_add_builtin(e, "define", builtin_define);
+  environment_add_builtin(e, "global", builtin_global);
+  environment_add_builtin(e, "fn", builtin_fn);
 
   environment_add_builtin(e, "list", builtin_list);
   environment_add_builtin(e, "head", builtin_head);

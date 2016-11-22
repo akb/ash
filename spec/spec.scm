@@ -18,9 +18,11 @@
 (define (check-conditions conditions) (map check-condition conditions))
 
 (define (check-condition condition)
-  (let ((actual   (s-chomp (ash-eval (cdr condition))))
+  (let ((actual   (last (s-split "\n" (s-chomp (ash-eval (cdr condition))))))
         (expected (irregex-quote (car condition))))
-    (if (irregex-match expected actual) #t (list (cadr condition) expected actual))))
+    (if (irregex-match expected actual)
+        #t
+        (list (cadr condition) expected actual))))
 
 (define (ash-eval expressions)
   (let ((code (s-join "\n" expressions)))
