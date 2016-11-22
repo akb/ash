@@ -202,7 +202,7 @@ void node_print(Node* v) {
         node_print(v->arguments);
         putchar(' ');
         node_print(v->body);
-        putchar(' ');
+        putchar(')');
       }
   }
 }
@@ -248,7 +248,6 @@ Node* node_evaluate_s_expression(Environment* e, Node* v) {
 
   Node* f = node_pop(v, 0);
   if (f->type != NODE_FUNCTION) {
-    fprintf(stderr, "NOTAFUNCITON NODE TYPE: %s\n", nodetype_name(f->type));
     node_delete(f);
     node_delete(v);
     return new_node_error("S-Expression does not begin with a symbol.");

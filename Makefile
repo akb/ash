@@ -1,4 +1,4 @@
-.PHONY: clean test
+.PHONY: all clean test
 
 BINARY=./bin/ash
 CC=cc
@@ -7,6 +7,8 @@ MACOS_CFLAGS=$(CFLAGS) -ledit
 LINUX_CFLAGS=$(MACOS_CFLAGS) -lm
 SRC_FILES=mpc.c environment.c builtins.c node.c \
 					editline.c parser.c ash.c debug.c
+
+all: clean $(BINARY) test
 
 $(BINARY):
 	$(CC) $(CFLAGS) $(MACOS_CFLAGS) $(SRC_FILES) -o $(BINARY)

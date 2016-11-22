@@ -22,9 +22,8 @@ void ash_parse_arguments(int, char**);
 
 int main(int argc, char** argv) {
   ash_parse_arguments(argc, argv);
-  if (flag_silent == false) {
+  if (flag_silent == false)
     ash_print_startup_message();
-  }
 
   Environment* e = new_environment();
   environment_add_builtins(e);

@@ -80,7 +80,7 @@ void environment_put(Environment* e, Node* k, Node* v) {
 }
 
 void environment_put_global(Environment* e, Node* k, Node* v) {
-  while (e->parent) { e = e->parent; }
+  while (e->parent) e = e->parent;
   environment_put(e, k, v);
 }
 
