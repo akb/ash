@@ -1,6 +1,10 @@
 #include <stdlib.h>
-#include <strings.h>
 #include <math.h>
+#include <strings.h>
+
+#ifdef __linux__
+  #include <string.h>
+#endif
 
 #include "environment.h"
 #include "node.h"

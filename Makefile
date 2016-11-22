@@ -11,6 +11,9 @@ SRC_FILES=mpc.c environment.c builtins.c node.c \
 $(BINARY):
 	$(CC) $(CFLAGS) $(MACOS_CFLAGS) $(SRC_FILES) -o $(BINARY)
 
+linux:
+	$(CC) $(CFLAGS) $(LINUX_CFLAGS) $(SRC_FILES) -o $(BINARY)
+
 clean:
 	rm -rf bin/ash
 

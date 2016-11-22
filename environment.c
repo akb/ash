@@ -2,6 +2,10 @@
 #include <stdio.h>
 #include <strings.h>
 
+#ifdef __linux__
+  #include <string.h>
+#endif
+
 #include "environment.h"
 #include "node.h"
 #include "builtins.h"
