@@ -38,18 +38,14 @@ int main(int argc, char** argv) {
     Parser* parser = new_parser();
 
     mpc_result_t r;
-    log_debug("main: parsing expression");
     if (mpc_parse("<stdin>", input, parser->ash, &r)) {
       if (flag_debug == true) mpc_ast_print(r.output);
-      log_debug("main: evaluating expression");
       Node* result = node_evaluate(e, new_node_from_ast(r.output));
-      log_debug("main: displaying result");
       node_println(result);
       if (result->type == NODE_EXIT) exit_code = result->exit_code;
       node_delete(result);
       mpc_ast_delete(r.output);
     } else {
-      log_debug("main: expression evaluated to error.");
       mpc_err_print(r.error);
       mpc_err_delete(r.error);
     }
@@ -57,7 +53,6 @@ int main(int argc, char** argv) {
     parser_delete(parser);
     free(input);
   }
-  log_debug("main: received exit code, exiting");
 
   environment_delete(e);
   return exit_code;

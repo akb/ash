@@ -25,11 +25,13 @@
         (list (cadr condition) expected actual))))
 
 (define (ash-eval expressions)
-  (let ((code (s-join "\n" expressions)))
-    (let ((stdout (capture ,(format #f "echo \"~A\" | ~A -s" code interpreter))))
+  (let ((stdout (capture ,(format-command expressions))))
     (if (= (string-length stdout) 0)
-      (fatal "Failed to execute \n~A\n" command)
-      (last (s-split "\n" stdout))))))
+        (fatal "Failed to execute \n~A\n" command)
+        (last (s-split "\n" stdout)))))
+
+(define (format-command expressions)
+  (format #f "echo \"~A\" | ~A -s" (s-join "\n" expressions) interpreter))
 
 (define interpreter
   (filepath:join-path (append (list (current-directory)) '("bin" "ash"))))
