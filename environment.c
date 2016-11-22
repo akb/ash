@@ -85,16 +85,12 @@ void environment_put_global(Environment* e, Node* k, Node* v) {
 }
 
 void environment_add_builtin(Environment* e, char* name, BuiltIn builtin) {
-  log_debug("environment_add_builtin: start");
   Node* k = new_node_symbol(name);
   char display_name[strlen(name) + 3];
   sprintf(display_name, "(%s)", name);
   Node* v = new_node_builtin(builtin, display_name);
-  log_debug("writing builtin to environment");
   environment_put(e, k, v);
-  log_debug("deleting node k");
   node_delete(k);
-  log_debug("deleting node v");
   node_delete(v);
 }
 

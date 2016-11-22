@@ -105,7 +105,6 @@ Node* new_node_builtin(BuiltIn builtin, char* name) {
 }
 
 Node* new_node_function(Node* arguments, Node* body) {
-  log_debug("new_node_function: start");
   Node* v = malloc(sizeof(Node));
   v->type = NODE_FUNCTION;
   v->builtin = NULL;
@@ -160,7 +159,6 @@ Node* node_copy(Node* v) {
 }
 
 void node_delete(Node* v) {
-  log_debug("node_delete: start");
   switch (v->type) {
     case NODE_EXIT:                    break;
     case NODE_INTEGER:                 break;
@@ -222,7 +220,6 @@ void node_println(Node* v) {
 }
 
 Node* node_evaluate(Environment* e, Node* v) {
-  log_debug("node_evaluate: start");
   if (v->type == NODE_SYMBOL) {
     Node* x = environment_get(e, v);
     node_delete(v);
@@ -235,7 +232,6 @@ Node* node_evaluate(Environment* e, Node* v) {
 }
 
 Node* node_evaluate_s_expression(Environment* e, Node* v) {
-  log_debug("node_evaluate_s_expression: start");
   for (int i = 0; i < v->count; i++)
     v->cell[i] = node_evaluate(e, v->cell[i]);
 
@@ -286,7 +282,6 @@ Node* node_add(Node* v, Node* x) {
 }
 
 Node* node_call(Environment* e, Node* f, Node* a) {
-  log_debug("node_call: start");
   if (f->builtin != NULL) {
     return f->builtin(e, a);
   }
